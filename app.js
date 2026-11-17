@@ -50,6 +50,13 @@ var tab=ss('pk-tab')||'sched', filter=ls('pk-filter')||'', dview=ls('pk-div')||'
 function isAdmin(){return !!cred}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function sc(k){var v=state.scores[k];return v&&typeof v.a==='number'&&typeof v.b==='number'?v:null}
+function finalV(id){
+  var sets=[1,2,3].map(function(i){return sc('t'+id+'s'+i)}),wa=0,wb=0;
+  sets.forEach(function(v){var aw=winA(v);if(aw===true)wa++;else if(aw===false)wb++});
+  if(!sets[0])return null;
+  return {a:wa,b:wb,w:null,sets:sets,done:wa>=2||wb>=2};
+}
+function mv(m){if(m.fin){var f=finalV(m.id);return f&&f.done?f:null}return sc(m.key)}
 function winA(v){if(!v)return null;return v.a>v.b?true:v.b>v.a?false:(v.w==='a'?true:v.w==='b'?false:null)}
 
 /* ---------- 計算 ---------- */
@@ -87,7 +94,7 @@ function compute(){
     var m=/^([WL]):(\w+)$/.exec(code);if(m){var t=T[m[2]];return t?(m[1]==='W'?t.win:t.lose)||null:null}
     return null;
   }
-  TOUR.forEach(function(d){var o={id:d.id,d:d,a:res(d.a),b:res(d.b),v:sc('t'+d.id)};
+  TOUR.forEach(function(d){var o={id:d.id,d:d,a:res(d.a),b:res(d.b),v:d.fin?mv({fin:true,id:d.id}):sc('t'+d.id)};
     if(o.a&&o.b&&o.v){var aw=winA(o.v);if(aw!==null){o.aw=aw;o.win=aw?o.a:o.b;o.lose=aw?o.b:o.a}}
     T[d.id]=o});
   return {st:st,lg:lg,bdone:bdone,T:T,played:played,total:total,h2h:h2h};
@@ -128,15 +135,15 @@ function seg(id,cur,items){return '<div class="seg" role="group">'+items.map(fun
 function rowHTML(name,ph,code,s,w,ex){return '<div class="row'+(w?' w':'')+(filter&&name===filter?' hl':'')+'"><span class="tn'+(name?'':' ph')+'">'+(code?'<small>'+esc(code)+'</small>':'')+(name?esc(name):esc(ph))+'</span><span class="sc">'+(s==null?'–':s)+(ex||'')+'</span></div>'}
 function matchHTML(m,now){
   if(!m)return '<div class="match empty">－</div>';
-  var v=sc(m.key),aw=winA(v);
+  var fv=m.fin?finalV(m.id):null,v=m.fin?(fv?{a:fv.a,b:fv.b,w:null}:null):mv(m),aw=m.fin&&!(fv&&fv.done)?null:winA(v);
   var inv=(filter&&!(m.a===filter||m.b===filter))||(dview&&m.div!==dview);
   var vp=function(s){return v&&v.a===v.b&&v.w===s?'<small class="vp">V</small>':''};
   var tag=m.kind==='pre'?m.blk+'ブロック':m.r;
   return '<div class="match'+(m.court==='B'?' cb':'')+(inv?' dim':'')+(now?' now':'')+'"><div class="tags"><span class="dv '+m.div+'">'+DIV[m.div].sh+'</span><span class="bk">'+esc(tag)+(m.kind==='tour'?'（'+m.id+'）':'')+'</span>'+(now?'<span class="pill">次の試合</span>':'')+'</div>'+
     rowHTML(m.a,m.pa,m.kind==='pre'?m.ca:'',v?v.a:null,aw===true,vp('a'))+rowHTML(m.b,m.pb,m.kind==='pre'?m.cb:'',v?v.b:null,aw===false,vp('b'))+
-    (v&&v.a===v.b&&!v.w?'<div class="ref">引き分け</div>':'')+(m.fin?'<div class="ref">5分3セットマッチ（数字は取ったセット数）</div>':'')+'</div>';
+    (v&&v.a===v.b&&!v.w&&!m.fin?'<div class="ref">引き分け</div>':'')+(v&&!m.fin&&v.a===v.b&&v.w?'<div class="ref">時間終了 '+v.a+'-'+v.b+' → Vポイントで '+esc(v.w==='a'?m.a:m.b)+' の勝ち</div>':'')+(m.fin?'<div class="ref">'+(fv?fv.sets.map(function(x,i){return x?'第'+(i+1)+'セット '+x.a+'-'+x.b+(x.a===x.b&&x.w?'（V：'+esc(x.w==='a'?m.a:m.b)+'）':''):''}).filter(Boolean).join('<br>')+'<br>':'')+'5分3セットマッチ（大きい数字は取ったセット数）'+(fv&&!fv.done?'・試合中':'')+'</div>':'')+'</div>';
 }
-function nextKeys(all){var n={};['A','B'].forEach(function(c){for(var i=0;i<all.length;i++){var m=all[i];if(m.court===c&&m.a&&m.b&&!sc(m.key)){n[m.key]=1;break}}});return n}
+function nextKeys(all){var n={};['A','B'].forEach(function(c){for(var i=0;i<all.length;i++){var m=all[i];if(m.court===c&&m.a&&m.b&&!mv(m)){n[m.key]=1;break}}});return n}
 function viewSched(C){
   var tm=tourMatches(C),all=PM.concat(tm),nx=nextKeys(all);
   var h=cover();
@@ -214,6 +221,7 @@ function bracket(C,div){
   // 優勝
   var cy=tree.y;
   h+='<rect class="champ" x="'+(W-champW)+'" y="'+(cy-22)+'" width="'+champW+'" height="44" rx="9"/><text x="'+(W-champW/2)+'" y="'+(cy-7)+'" font-size="9.5" text-anchor="middle" class="champtx">🏆 優勝</text>'+fitText(W-champW/2,cy+11,rt&&rt.win?rt.win:'—',11.5,champW-8,'champtx','middle');
+  h+='<rect class="runner" x="'+(W-champW)+'" y="'+(cy+28)+'" width="'+champW+'" height="40" rx="9"/><text x="'+(W-champW/2)+'" y="'+(cy+42)+'" font-size="9" text-anchor="middle" class="runtx">🥈 準優勝</text>'+fitText(W-champW/2,cy+59,rt&&rt.lose?rt.lose:'—',11,champW-8,'runtx','middle');
   var hgt=top+18+(leaves.length-1)*gap+26;
   return '<svg class="bk" viewBox="0 0 '+W+' '+hgt+'" role="img" aria-label="'+DIV[div].nm+'の決勝トーナメント表">'+h+'</svg>';
 }
@@ -249,7 +257,10 @@ function viewInfo(){
 }
 
 /* ---------- 管理者 ---------- */
-function allMatches(C){return PM.concat(tourMatches(C))}
+function allMatches(C){var out=PM.slice();tourMatches(C).forEach(function(m){if(!m.fin){out.push(m);return}
+  var s1=sc(m.key+'s1'),s2=sc(m.key+'s2'),need3=!!(s1&&s2&&winA(s1)!==null&&winA(s2)!==null&&winA(s1)!==winA(s2));
+  [1,2,3].forEach(function(i){var x={};for(var q in m)x[q]=m[q];x.key=m.key+'s'+i;x.fin=false;x.set=i;x.r='決勝戦 第'+i+'セット';x.off=i===3&&!need3&&!sc(x.key);out.push(x)})});
+  return out}
 function viewLogin(){
   return '<div class="card"><h2>管理者ログイン</h2><p class="note">本部で結果を入力する方だけが使います。</p><form id="login" class="card" style="box-shadow:none;padding:0;border:0"><div class="field"><label for="lid">ID</label><input id="lid" type="text" autocomplete="username" required></div><div class="field"><label for="lpw">パスワード</label><input id="lpw" type="password" autocomplete="current-password" required></div><button class="btn primary" type="submit">ログイン</button></form></div>';
 }
@@ -260,7 +271,7 @@ function wVal(m){var d=drafts[m.key];if(d&&d.w!==undefined)return d.w;var v=sc(m
 function rowState(m){var d=drafts[m.key],v=sc(m.key);if(d&&(d.a!==undefined||d.b!==undefined||d.w!==undefined)){var a=cellVal(m,'a'),b=cellVal(m,'b'),w=wVal(m);if(!v||String(v.a)!==a||String(v.b)!==b||(v.w||'')!==w)return 'dirty'}return v?'saved':'empty'}
 function viewEntry(C){
   var ms=allMatches(C),n=ms.filter(function(m){return sc(m.key)}).length;
-  var list=ms.filter(function(m){return efil==='pre'?m.kind==='pre':efil==='tour'?m.kind==='tour':efil==='todo'?!sc(m.key):true});
+  var list=ms.filter(function(m){return efil==='pre'?m.kind==='pre':efil==='tour'?m.kind==='tour':efil==='todo'?(!sc(m.key)&&!m.off):true});
   var h='<div class="card"><h2>結果の入力</h2><div class="progress" aria-label="入力済み '+n+' / '+ms.length+'"><b style="width:'+(n/ms.length*100).toFixed(1)+'%"></b></div>'+
    '<p class="note">入力済み '+n+' / '+ms.length+' 試合。数字は試合終了時の内野人数（決勝戦は取ったセット数）です。'+(MOBILE?'<b>数字を2つ打つと自動で保存</b>され、次の試合に進みます。':'テンキーで <b>左の数字 → 右の数字 → Enter</b> で保存し、次の試合に進みます（2〜9と0は自動で右の欄へ移ります。10〜19は「1」に続けてもう1桁打ってください）。↑↓キーで試合を移動できます。')+'</p>'+
    seg('efil',efil,[['all','すべて'],['pre','予選'],['tour','決勝T'],['todo','未入力だけ']])+'</div>';
@@ -269,15 +280,15 @@ function viewEntry(C){
   list.forEach(function(m){
     var sec=m.kind==='pre'?'予選リーグ':'決勝トーナメント';
     if(sec!==prevSec){h+='<tr class="sec"><td colspan="8">'+sec+'</td></tr>';prevSec=sec}
-    var ok=m.a&&m.b,st=rowState(m),k=m.key,mx=maxOf(m);
+    var ok=!!(m.a&&m.b)&&!m.off,st=rowState(m),k=m.key,mx=maxOf(m);
     var no=m.kind==='pre'?'第'+m.row+'試合':m.id+' '+esc(m.r);
     var tie=m.kind==='tour'&&ok&&cellVal(m,'a')!==''&&cellVal(m,'a')===cellVal(m,'b');
     h+='<tr class="er '+st+(m.court==='B'?' cb':'')+'" data-row="'+k+'"><td class="c-no"><b>'+m.court+'</b> '+no+(m.time?'<small>'+m.time+'</small>':'')+'<span class="dv '+m.div+'">'+DIV[m.div].sh+(m.kind==='pre'?' '+m.blk:'')+'</span></td>'+
-     '<td class="c-tm r">'+(ok?esc(m.a):'<span class="ph">'+esc(m.pa||'未確定')+'</span>')+'</td>'+
+     '<td class="c-tm r">'+(ok?esc(m.a):'<span class="ph">'+(m.off?'第3セットは1-1のときだけ':esc(m.pa||'未確定'))+'</span>')+'</td>'+
      '<td class="c-in"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" id="in-'+k+'-a" data-k="'+k+'" data-s="a" data-max="'+mx+'" value="'+cellVal(m,'a')+'"'+(ok?'':' disabled')+' aria-label="'+esc(m.a||'左のチーム')+'の数字（0〜'+mx+'）"></td><td class="c-dash">−</td>'+
      '<td class="c-in"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" id="in-'+k+'-b" data-k="'+k+'" data-s="b" data-max="'+mx+'" value="'+cellVal(m,'b')+'"'+(ok?'':' disabled')+' aria-label="'+esc(m.b||'右のチーム')+'の数字（0〜'+mx+'）"></td>'+
      '<td class="c-tm">'+(ok?esc(m.b):'<span class="ph">'+esc(m.pb||'未確定')+'</span>')+'</td>'+
-     '<td class="c-v">'+(m.kind==='tour'?'<select class="vsel" id="in-'+k+'-w" data-k="'+k+'" data-s="w"'+(tie?'':' disabled')+' aria-label="同点のときの勝者"><option value="">'+(tie?'選んでください':'－')+'</option><option value="a"'+(wVal(m)==='a'?' selected':'')+'>'+esc(m.a||'左')+'</option><option value="b"'+(wVal(m)==='b'?' selected':'')+'>'+esc(m.b||'右')+'</option></select>':'')+'</td>'+
+     '<td class="c-v">'+(m.kind==='tour'?'<select class="vsel" id="in-'+k+'-w" data-k="'+k+'" data-s="w"'+(tie?'':' disabled')+' aria-label="同点のときの勝者"><option value="">'+(tie?'1か2を押して選ぶ':'同点のときだけ')+'</option><option value="a"'+(wVal(m)==='a'?' selected':'')+'>1：'+esc(m.a||'左')+'</option><option value="b"'+(wVal(m)==='b'?' selected':'')+'>2：'+esc(m.b||'右')+'</option></select>':'')+'</td>'+
      '<td class="c-op"><button type="button" class="sv" data-save="'+k+'" tabindex="-1"'+(ok?'':' disabled')+'>'+(st==='saved'?'保存済み':'保存')+'</button>'+(sc(k)?'<button type="button" class="del" data-del="'+k+'" tabindex="-1" aria-label="この試合の結果を消す">消す</button>':'')+'</td></tr>';
   });
   h+='</tbody></table></div>';
@@ -363,7 +374,7 @@ document.addEventListener('change',function(e){
   if(e.target.classList&&e.target.classList.contains('vsel')){var k=e.target.getAttribute('data-k');drafts[k]=drafts[k]||{};drafts[k].w=e.target.value;markRow(k)}
 });
 function markRow(k){var tr=document.querySelector('tr[data-row="'+k+'"]');var m=findM(k);if(!tr||!m)return;var st=rowState(m);tr.classList.remove('saved','dirty','empty');tr.classList.add(st);var b=tr.querySelector('.sv');if(b)b.textContent=st==='saved'?'保存済み':'保存';
-  var sel=document.getElementById('in-'+k+'-w');if(sel){var tie=cellVal(m,'a')!==''&&cellVal(m,'a')===cellVal(m,'b');sel.disabled=!tie;sel.options[0].textContent=tie?'選んでください':'－'}}
+  var sel=document.getElementById('in-'+k+'-w');if(sel){var tie=cellVal(m,'a')!==''&&cellVal(m,'a')===cellVal(m,'b');sel.disabled=!tie;sel.options[0].textContent=tie?'1か2を押して選ぶ':'同点のときだけ'}}
 document.addEventListener('input',function(e){var t=e.target;if(!t.classList||!t.classList.contains('num'))return;var v=t.value.replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-65248)}).replace(/\D/g,'').slice(0,2);if(v!==t.value)t.value=v;var k=t.getAttribute('data-k'),sd=t.getAttribute('data-s');drafts[k]=drafts[k]||{};drafts[k][sd]=v;markRow(k);
   var mx=+t.getAttribute('data-max')||12,full=v!==''&&(v.length===2||v==='0'||(+v)*10>mx);if(!full)return;
   if(sd==='a'){var nb=document.getElementById('in-'+k+'-b');if(nb){nb.focus();nb.select()}return}

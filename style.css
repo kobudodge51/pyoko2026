@@ -360,3 +360,5 @@ body.wide .refresh{display:none}
 @media (max-width:760px){.etbl tr.er{grid-template-columns:minmax(0,1fr) 96px}.num{width:96px;height:54px;font-size:28px}}
 .etbl .c-in input.num{width:92px}
 @media (max-width:760px){.etbl colgroup{display:none}}
+.bk .runner{fill:var(--surface);stroke:#8C949C;stroke-width:1.5}
+.bk .runtx{fill:var(--ink);font-weight:700}
