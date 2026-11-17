@@ -254,7 +254,7 @@ function viewLogin(){
   return '<div class="card"><h2>管理者ログイン</h2><p class="note">本部で結果を入力する方だけが使います。</p><form id="login" class="card" style="box-shadow:none;padding:0;border:0"><div class="field"><label for="lid">ID</label><input id="lid" type="text" autocomplete="username" required></div><div class="field"><label for="lpw">パスワード</label><input id="lpw" type="password" autocomplete="current-password" required></div><button class="btn primary" type="submit">ログイン</button></form></div>';
 }
 var MOBILE=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches), drafts={}, efil=ss('pk-efil')||'all';
-function maxOf(m){return m.fin?2:(m.div==='OF'?12:8)}
+function maxOf(m){return m.fin?2:19}
 function cellVal(m,s){var d=drafts[m.key];if(d&&d[s]!==undefined)return d[s];var v=sc(m.key);return v?String(v[s]):''}
 function wVal(m){var d=drafts[m.key];if(d&&d.w!==undefined)return d.w;var v=sc(m.key);return v?v.w||'':''}
 function rowState(m){var d=drafts[m.key],v=sc(m.key);if(d&&(d.a!==undefined||d.b!==undefined||d.w!==undefined)){var a=cellVal(m,'a'),b=cellVal(m,'b'),w=wVal(m);if(!v||String(v.a)!==a||String(v.b)!==b||(v.w||'')!==w)return 'dirty'}return v?'saved':'empty'}
@@ -262,7 +262,7 @@ function viewEntry(C){
   var ms=allMatches(C),n=ms.filter(function(m){return sc(m.key)}).length;
   var list=ms.filter(function(m){return efil==='pre'?m.kind==='pre':efil==='tour'?m.kind==='tour':efil==='todo'?!sc(m.key):true});
   var h='<div class="card"><h2>結果の入力</h2><div class="progress" aria-label="入力済み '+n+' / '+ms.length+'"><b style="width:'+(n/ms.length*100).toFixed(1)+'%"></b></div>'+
-   '<p class="note">入力済み '+n+' / '+ms.length+' 試合。数字は試合終了時の内野人数（決勝戦は取ったセット数）です。'+(MOBILE?'<b>数字を2つ打つと自動で保存</b>され、次の試合に進みます。':'テンキーで <b>左の数字 → 右の数字 → Enter</b> で保存し、次の試合に進みます（0〜9の1桁は自動で右の欄へ移ります）。↑↓キーで試合を移動できます。')+'</p>'+
+   '<p class="note">入力済み '+n+' / '+ms.length+' 試合。数字は試合終了時の内野人数（決勝戦は取ったセット数）です。'+(MOBILE?'<b>数字を2つ打つと自動で保存</b>され、次の試合に進みます。':'テンキーで <b>左の数字 → 右の数字 → Enter</b> で保存し、次の試合に進みます（2〜9と0は自動で右の欄へ移ります。10〜19は「1」に続けてもう1桁打ってください）。↑↓キーで試合を移動できます。')+'</p>'+
    seg('efil',efil,[['all','すべて'],['pre','予選'],['tour','決勝T'],['todo','未入力だけ']])+'</div>';
   h+='<div class="etbl-wrap"><table class="etbl"><thead><tr><th class="c-no">試合</th><th class="c-tm r">チーム（左）</th><th class="c-in" colspan="3">内野人数</th><th class="c-tm">チーム（右）</th><th class="c-v">Vポイント勝者</th><th class="c-op"></th></tr></thead><tbody>';
   var prevSec='';
