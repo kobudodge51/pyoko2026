@@ -253,7 +253,7 @@ function allMatches(C){return PM.concat(tourMatches(C))}
 function viewLogin(){
   return '<div class="card"><h2>管理者ログイン</h2><p class="note">本部で結果を入力する方だけが使います。</p><form id="login" class="card" style="box-shadow:none;padding:0;border:0"><div class="field"><label for="lid">ID</label><input id="lid" type="text" autocomplete="username" required></div><div class="field"><label for="lpw">パスワード</label><input id="lpw" type="password" autocomplete="current-password" required></div><button class="btn primary" type="submit">ログイン</button></form></div>';
 }
-var drafts={}, efil=ss('pk-efil')||'all';
+var MOBILE=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches), drafts={}, efil=ss('pk-efil')||'all';
 function maxOf(m){return m.fin?2:(m.div==='OF'?12:8)}
 function cellVal(m,s){var d=drafts[m.key];if(d&&d[s]!==undefined)return d[s];var v=sc(m.key);return v?String(v[s]):''}
 function wVal(m){var d=drafts[m.key];if(d&&d.w!==undefined)return d.w;var v=sc(m.key);return v?v.w||'':''}
@@ -262,7 +262,7 @@ function viewEntry(C){
   var ms=allMatches(C),n=ms.filter(function(m){return sc(m.key)}).length;
   var list=ms.filter(function(m){return efil==='pre'?m.kind==='pre':efil==='tour'?m.kind==='tour':efil==='todo'?!sc(m.key):true});
   var h='<div class="card"><h2>結果の入力</h2><div class="progress" aria-label="入力済み '+n+' / '+ms.length+'"><b style="width:'+(n/ms.length*100).toFixed(1)+'%"></b></div>'+
-   '<p class="note">入力済み '+n+' / '+ms.length+' 試合。数字は試合終了時の内野人数（決勝戦は取ったセット数）です。<b>数字を入れて Enter キー</b>でその試合を保存し、次の試合に移ります。Tab キーで左右の欄を移動できます。</p>'+
+   '<p class="note">入力済み '+n+' / '+ms.length+' 試合。数字は試合終了時の内野人数（決勝戦は取ったセット数）です。'+(MOBILE?'<b>数字を2つ打つと自動で保存</b>され、次の試合に進みます。':'テンキーで <b>左の数字 → 右の数字 → Enter</b> で保存し、次の試合に進みます（0〜9の1桁は自動で右の欄へ移ります）。↑↓キーで試合を移動できます。')+'</p>'+
    seg('efil',efil,[['all','すべて'],['pre','予選'],['tour','決勝T'],['todo','未入力だけ']])+'</div>';
   h+='<div class="etbl-wrap"><table class="etbl"><thead><tr><th class="c-no">試合</th><th class="c-tm r">チーム（左）</th><th class="c-in" colspan="3">内野人数</th><th class="c-tm">チーム（右）</th><th class="c-v">Vポイント勝者</th><th class="c-op"></th></tr></thead><tbody>';
   var prevSec='';
@@ -274,8 +274,8 @@ function viewEntry(C){
     var tie=m.kind==='tour'&&ok&&cellVal(m,'a')!==''&&cellVal(m,'a')===cellVal(m,'b');
     h+='<tr class="er '+st+(m.court==='B'?' cb':'')+'" data-row="'+k+'"><td class="c-no"><b>'+m.court+'</b> '+no+(m.time?'<small>'+m.time+'</small>':'')+'<span class="dv '+m.div+'">'+DIV[m.div].sh+(m.kind==='pre'?' '+m.blk:'')+'</span></td>'+
      '<td class="c-tm r">'+(ok?esc(m.a):'<span class="ph">'+esc(m.pa||'未確定')+'</span>')+'</td>'+
-     '<td class="c-in"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" id="in-'+k+'-a" data-k="'+k+'" data-s="a" value="'+cellVal(m,'a')+'"'+(ok?'':' disabled')+' aria-label="'+esc(m.a||'左のチーム')+'の数字（0〜'+mx+'）"></td><td class="c-dash">−</td>'+
-     '<td class="c-in"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" id="in-'+k+'-b" data-k="'+k+'" data-s="b" value="'+cellVal(m,'b')+'"'+(ok?'':' disabled')+' aria-label="'+esc(m.b||'右のチーム')+'の数字（0〜'+mx+'）"></td>'+
+     '<td class="c-in"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" id="in-'+k+'-a" data-k="'+k+'" data-s="a" data-max="'+mx+'" value="'+cellVal(m,'a')+'"'+(ok?'':' disabled')+' aria-label="'+esc(m.a||'左のチーム')+'の数字（0〜'+mx+'）"></td><td class="c-dash">−</td>'+
+     '<td class="c-in"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" id="in-'+k+'-b" data-k="'+k+'" data-s="b" data-max="'+mx+'" value="'+cellVal(m,'b')+'"'+(ok?'':' disabled')+' aria-label="'+esc(m.b||'右のチーム')+'の数字（0〜'+mx+'）"></td>'+
      '<td class="c-tm">'+(ok?esc(m.b):'<span class="ph">'+esc(m.pb||'未確定')+'</span>')+'</td>'+
      '<td class="c-v">'+(m.kind==='tour'?'<select class="vsel" id="in-'+k+'-w" data-k="'+k+'" data-s="w"'+(tie?'':' disabled')+' aria-label="同点のときの勝者"><option value="">'+(tie?'選んでください':'－')+'</option><option value="a"'+(wVal(m)==='a'?' selected':'')+'>'+esc(m.a||'左')+'</option><option value="b"'+(wVal(m)==='b'?' selected':'')+'>'+esc(m.b||'右')+'</option></select>':'')+'</td>'+
      '<td class="c-op"><button type="button" class="sv" data-save="'+k+'" tabindex="-1"'+(ok?'':' disabled')+'>'+(st==='saved'?'保存済み':'保存')+'</button>'+(sc(k)?'<button type="button" class="del" data-del="'+k+'" tabindex="-1" aria-label="この試合の結果を消す">消す</button>':'')+'</td></tr>';
@@ -341,8 +341,8 @@ function werr(e){console.error(e);toast('保存できませんでした。電波
 /* ---------- 操作 ---------- */
 document.addEventListener('click',function(e){
   var t=e.target.closest('[data-th]');if(t){var v=t.getAttribute('data-th');document.documentElement.setAttribute('data-theme',v);ls('pk-theme',v);render();return}
-  t=e.target.closest('[data-tab]');if(t){tab=t.getAttribute('data-tab');ss('pk-tab',tab==='login'?'sched':tab);render();window.scrollTo(0,0);return}
-  t=e.target.closest('[data-seg]');if(t){var k=t.getAttribute('data-seg'),v2=t.getAttribute('data-v');if(k==='dview'){dview=v2;ls('pk-div',v2)}if(k==='lview'){lview=v2;ls('pk-ldiv',v2)}if(k==='tview'){tview=v2;ls('pk-tdiv',v2)}if(k==='efil'){efil=v2;ss('pk-efil',v2)}render();return}
+  t=e.target.closest('[data-tab]');if(t){tab=t.getAttribute('data-tab');ss('pk-tab',tab==='login'?'sched':tab);render();window.scrollTo(0,0);if(tab==='entry')focusFirst();return}
+  t=e.target.closest('[data-seg]');if(t){var k=t.getAttribute('data-seg'),v2=t.getAttribute('data-v');if(k==='dview'){dview=v2;ls('pk-div',v2)}if(k==='lview'){lview=v2;ls('pk-ldiv',v2)}if(k==='tview'){tview=v2;ls('pk-tdiv',v2)}if(k==='efil'){efil=v2;ss('pk-efil',v2);render();focusFirst();return}render();return}
   var rb=e.target.closest('#refresh');if(rb){
     if(rb.classList.contains('busy'))return;rb.classList.add('busy');rb.querySelector('.t span').textContent='更新中…';
     try{navigator.vibrate&&navigator.vibrate(15)}catch(x){}
@@ -364,10 +364,22 @@ document.addEventListener('change',function(e){
 });
 function markRow(k){var tr=document.querySelector('tr[data-row="'+k+'"]');var m=findM(k);if(!tr||!m)return;var st=rowState(m);tr.classList.remove('saved','dirty','empty');tr.classList.add(st);var b=tr.querySelector('.sv');if(b)b.textContent=st==='saved'?'保存済み':'保存';
   var sel=document.getElementById('in-'+k+'-w');if(sel){var tie=cellVal(m,'a')!==''&&cellVal(m,'a')===cellVal(m,'b');sel.disabled=!tie;sel.options[0].textContent=tie?'選んでください':'－'}}
-document.addEventListener('input',function(e){var t=e.target;if(!t.classList||!t.classList.contains('num'))return;var v=t.value.replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-65248)}).replace(/\D/g,'').slice(0,2);if(v!==t.value)t.value=v;var k=t.getAttribute('data-k');drafts[k]=drafts[k]||{};drafts[k][t.getAttribute('data-s')]=v;markRow(k)});
-document.addEventListener('keydown',function(e){var t=e.target;if(e.key!=='Enter'||e.isComposing||!t.getAttribute||!t.getAttribute('data-k'))return;e.preventDefault();var k=t.getAttribute('data-k');
-  if(t.getAttribute('data-s')==='a'){var nb=document.getElementById('in-'+k+'-b');if(nb&&nb.value===''){nb.focus();nb.select();return}}
+document.addEventListener('input',function(e){var t=e.target;if(!t.classList||!t.classList.contains('num'))return;var v=t.value.replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-65248)}).replace(/\D/g,'').slice(0,2);if(v!==t.value)t.value=v;var k=t.getAttribute('data-k'),sd=t.getAttribute('data-s');drafts[k]=drafts[k]||{};drafts[k][sd]=v;markRow(k);
+  var mx=+t.getAttribute('data-max')||12,full=v!==''&&(v.length===2||v==='0'||(+v)*10>mx);if(!full)return;
+  if(sd==='a'){var nb=document.getElementById('in-'+k+'-b');if(nb){nb.focus();nb.select()}return}
+  if(MOBILE){var m=findM(k),ta=cellVal(m,'a');if(ta===''){var na=document.getElementById('in-'+k+'-a');if(na)na.focus();return}
+    if(m.kind==='tour'&&ta===v){var sel=document.getElementById('in-'+k+'-w');if(sel)sel.focus();return}
+    focusNext(k);saveRow(k,false)}});
+document.addEventListener('keydown',function(e){var t=e.target;if(e.isComposing||!t.getAttribute||!t.getAttribute('data-k'))return;var k=t.getAttribute('data-k'),sd=t.getAttribute('data-s');
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();moveRow(k,sd,e.key==='ArrowDown'?1:-1);return}
+  if(e.key!=='Enter')return;e.preventDefault();
+  if(sd==='a'){var nb=document.getElementById('in-'+k+'-b');if(nb){nb.focus();nb.select()}return}
+  if(sd==='b'){var m=findM(k);if(cellVal(m,'a')===''){var na=document.getElementById('in-'+k+'-a');if(na)na.focus();return}if(cellVal(m,'b')==='')return;
+    if(m.kind==='tour'&&cellVal(m,'a')===cellVal(m,'b')&&!wVal(m)){var sel=document.getElementById('in-'+k+'-w');if(sel)sel.focus();toast('同点です。Vポイントで勝ったチームを選んでください');return}}
   saveRow(k,true)});
+function moveRow(k,sd,d){var rows=[].slice.call(document.querySelectorAll('tr.er')),i=-1;rows.forEach(function(r,j){if(r.getAttribute('data-row')===k)i=j});
+  for(var j=i+d;j>=0&&j<rows.length;j+=d){var inp=rows[j].querySelector('input.num[data-s="'+(sd==='w'?'a':sd)+'"]:not([disabled])');if(inp){inp.focus();inp.select();inp.scrollIntoView({block:'nearest'});return}}}
+function focusFirst(){if(MOBILE)return;var rows=document.querySelectorAll('tr.er.empty,tr.er.dirty');for(var i=0;i<rows.length;i++){var inp=rows[i].querySelector('input.num:not([disabled])');if(inp){inp.focus();inp.select();inp.scrollIntoView({block:'center'});return}}}
 document.addEventListener('focusin',function(e){if(e.target.classList&&e.target.classList.contains('num'))e.target.select()});
 document.addEventListener('submit',function(e){
   if(e.target.id!=='login')return;e.preventDefault();
@@ -375,12 +387,12 @@ document.addEventListener('submit',function(e){
   if(!sb){toast('接続の準備ができていません');return}
   sb.rpc('pk26_login',{p_id:id,p_pw:pw}).then(function(r){
     if(r.error||!r.data){toast('IDかパスワードが違います');return}
-    cred={id:id,pw:pw};ls('pk26-cred',JSON.stringify(cred));tab='entry';ss('pk-tab','entry');render();window.scrollTo(0,0);toast('ログインしました');
+    cred={id:id,pw:pw};ls('pk26-cred',JSON.stringify(cred));tab='entry';ss('pk-tab','entry');render();window.scrollTo(0,0);focusFirst();toast('ログインしました');
   },function(){toast('ログインできませんでした。電波を確認してください')});
 });
 
 /* ---------- 起動 ---------- */
-render();
+render();if(tab==='entry')setTimeout(focusFirst,50);
 if(!CFG.SUPABASE_URL||!window.supabase){loadError='接続の準備ができていません。';render()}
 else{
   sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY,{auth:{persistSession:false}});
