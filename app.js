@@ -187,9 +187,9 @@ function viewLeague(C){
 }
 
 /* ---------- 決勝トーナメント（SVG） ---------- */
-function est(s,z){var l=0;String(s).split('').forEach(function(c){l+=c.charCodeAt(0)>255?z:z*0.58});return l}
-function fitText(x,y,t,z,maxw,cls,anchor){var s=z;while(s>6.5&&est(t,s)>maxw)s-=0.5;return '<text x="'+x+'" y="'+y+'" font-size="'+s+'"'+(anchor?' text-anchor="'+anchor+'"':'')+(cls?' class="'+cls+'"':'')+'>'+esc(t)+'</text>'}
-function line(p,k){var col=k==='win'?'var(--path-win)':k==='lose'?'var(--path-lose)':'var(--path-none)';return '<polyline'+(k==='win'?' class="glow" style="color:'+col+'"':'')+' points="'+p+'" fill="none" stroke="'+col+'" stroke-width="'+(k==='win'?4.5:k==='lose'?3:1.6)+'" stroke-linejoin="round" stroke-linecap="round"/>'}
+function est(s,z){var l=0;String(s).split('').forEach(function(c){l+=c.charCodeAt(0)>255?z*1.02:(/[A-Z0-9]/.test(c)?z*0.66:z*0.56)});return l}
+function fitText(x,y,t,z,maxw,cls,anchor){var s=z;while(s>5.5&&est(t,s)>maxw)s-=0.25;return '<text x="'+x+'" y="'+y+'" font-size="'+s+'"'+(anchor?' text-anchor="'+anchor+'"':'')+(cls?' class="'+cls+'"':'')+'>'+esc(t)+'</text>'}
+function line(p,k){if(k==='lose')k=null;var col=k==='win'?'var(--path-win)':k==='lose'?'var(--path-lose)':'var(--path-none)';return '<polyline'+(k==='win'?' class="glow" style="color:'+col+'"':'')+' points="'+p+'" fill="none" stroke="'+col+'" stroke-width="'+(k==='win'?4.5:k==='lose'?3:1.6)+'" stroke-linejoin="round" stroke-linecap="round"/>'}
 function stag(x,y,v){return '<rect class="scbg" x="'+(x-9)+'" y="'+(y-11)+'" width="18" height="14" rx="3"/><text x="'+x+'" y="'+(y)+'" font-size="10" text-anchor="middle" class="sct">'+v+'</text>'}
 function bracket(C,div){
   var T=C.T,root=ROOT[div];
@@ -206,7 +206,7 @@ function bracket(C,div){
     n.k.forEach(function(kid,i){var side=i===0?'a':'b',k=null;
       if(t&&t.aw!==undefined)k=((side==='a')===t.aw)?'win':'lose';
       h+=line(kid.x+','+kid.y+' '+n.x+','+kid.y+' '+n.x+','+n.y,k);
-      if(t&&t.v)h+=stag(n.x-12,kid.y-3,t.v[side]);
+      if(t&&t.v){h+=stag(n.x-12,kid.y-3,t.v[side]);if(!TD[n.id].fin&&t.v.a===t.v.b&&t.v.w===side)h+='<text x="'+(n.x-24)+'" y="'+(kid.y-4)+'" font-size="8" text-anchor="end" class="vtx">V</text>'}
       draw(kid)});
     h+='<text x="'+(n.x+4)+'" y="'+(n.y+12)+'" font-size="8.5" class="sub">'+n.id+'</text>';
   })(tree);
@@ -222,7 +222,8 @@ function bracket(C,div){
   var cy=tree.y;
   h+='<rect class="champ" x="'+(W-champW)+'" y="'+(cy-22)+'" width="'+champW+'" height="44" rx="9"/><text x="'+(W-champW/2)+'" y="'+(cy-7)+'" font-size="9.5" text-anchor="middle" class="champtx">🏆 優勝</text>'+fitText(W-champW/2,cy+11,rt&&rt.win?rt.win:'—',11.5,champW-8,'champtx','middle');
   h+='<rect class="runner" x="'+(W-champW)+'" y="'+(cy+28)+'" width="'+champW+'" height="40" rx="9"/><text x="'+(W-champW/2)+'" y="'+(cy+42)+'" font-size="9" text-anchor="middle" class="runtx">🥈 準優勝</text>'+fitText(W-champW/2,cy+59,rt&&rt.lose?rt.lose:'—',11,champW-8,'runtx','middle');
-  var hgt=top+18+(leaves.length-1)*gap+26;
+  var fv=finalV(root);if(fv){h+='<text x="'+(W-champW/2)+'" y="'+(cy+82)+'" font-size="8.5" text-anchor="middle" class="sub">決勝のセット</text>';fv.sets.forEach(function(x,i){if(x)h+='<text x="'+(W-champW/2)+'" y="'+(cy+95+i*11)+'" font-size="9" text-anchor="middle" class="setx">'+(i+1)+') '+x.a+'-'+x.b+(x.a===x.b&&x.w?' V':'')+'</text>'})}
+  var hgt=Math.max(top+18+(leaves.length-1)*gap+26,cy+95+(fv?33:0));
   return '<svg class="bk" viewBox="0 0 '+W+' '+hgt+'" role="img" aria-label="'+DIV[div].nm+'の決勝トーナメント表">'+h+'</svg>';
 }
 function podium(C,div){
@@ -235,7 +236,7 @@ function viewTour(C){
   var d=tview;
   var h='<div style="display:grid;gap:8px"><h2>決勝トーナメント</h2>'+seg('tview',d,[['OF','オフィシャル'],['JR','ジュニア']])+
    '<p class="note">'+(d==='OF'?'オフィシャルの部は各ブロック上位3チーム（6チーム）。3位決定戦はなく、準決勝で負けた2チームが第3位です。':'ジュニアの部は各ブロック上位3チーム（9チーム）。準決勝で負けた2チームで3位決定戦（B6）を行います。')+'準決勝までは5分1セット、決勝戦は5分3セットマッチ（2セット先取）。同数のときは延長Vポイントで決めます。</p>'+
-   '<div class="legend"><span><i style="background:var(--path-win)"></i>勝ち上がり</span><span><i style="background:var(--path-lose)"></i>敗退</span><span><small class="vp">V</small> Vポイントで勝利</span></div></div>';
+   '<div class="legend"><span><i style="background:var(--path-win)"></i>勝ち上がり</span><span><small class="vp">V</small> Vポイントで勝利</span></div></div>';
   h+='<div class="card"><h3>最終順位</h3>'+podium(C,d)+'</div>';
   h+='<div class="card"><h3>'+DIV[d].nm+' トーナメント表</h3>'+bracket(C,d)+'</div>';
   var tm=tourMatches(C).filter(function(m){return m.div===d});
