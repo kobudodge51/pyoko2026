@@ -264,7 +264,7 @@ function viewEntry(C){
   var h='<div class="card"><h2>結果の入力</h2><div class="progress" aria-label="入力済み '+n+' / '+ms.length+'"><b style="width:'+(n/ms.length*100).toFixed(1)+'%"></b></div>'+
    '<p class="note">入力済み '+n+' / '+ms.length+' 試合。数字は試合終了時の内野人数（決勝戦は取ったセット数）です。'+(MOBILE?'<b>数字を2つ打つと自動で保存</b>され、次の試合に進みます。':'テンキーで <b>左の数字 → 右の数字 → Enter</b> で保存し、次の試合に進みます（2〜9と0は自動で右の欄へ移ります。10〜19は「1」に続けてもう1桁打ってください）。↑↓キーで試合を移動できます。')+'</p>'+
    seg('efil',efil,[['all','すべて'],['pre','予選'],['tour','決勝T'],['todo','未入力だけ']])+'</div>';
-  h+='<div class="etbl-wrap"><table class="etbl"><thead><tr><th class="c-no">試合</th><th class="c-tm r">チーム（左）</th><th class="c-in" colspan="3">内野人数</th><th class="c-tm">チーム（右）</th><th class="c-v">Vポイント勝者</th><th class="c-op"></th></tr></thead><tbody>';
+  h+='<div class="etbl-wrap"><table class="etbl"><colgroup><col style="width:170px"><col><col style="width:100px"><col style="width:22px"><col style="width:100px"><col><col style="width:170px"><col style="width:132px"></colgroup><thead><tr><th class="c-no">試合</th><th class="c-tm r">チーム（左）</th><th class="c-in" colspan="3">内野人数</th><th class="c-tm">チーム（右）</th><th class="c-v">Vポイント勝者</th><th class="c-op"></th></tr></thead><tbody>';
   var prevSec='';
   list.forEach(function(m){
     var sec=m.kind==='pre'?'予選リーグ':'決勝トーナメント';
