@@ -190,7 +190,7 @@ function bracket(C,div){
   var tree={id:root,k:[build(TD[root].a),build(TD[root].b)]};
   var leaves=[];(function walk(n){if(n.seed)leaves.push(n);else n.k.forEach(walk)})(tree);
   function ht(n){return n.seed?0:1+Math.max(ht(n.k[0]),ht(n.k[1]))}
-  var H=ht(tree),W=360,boxW=112,champW=74,colW=(W-boxW-champW-8)/H,gap=div==='JR'?38:46,top=12;
+  var H=ht(tree),W=360,boxW=112,champW=70,colW=(W-boxW-champW-26)/H,gap=div==='JR'?38:46,top=12;
   leaves.forEach(function(l,i){l.y=top+18+i*gap});
   (function pos(n){if(n.seed){n.x=boxW;return}n.k.forEach(pos);n.y=(n.k[0].y+n.k[1].y)/2;n.x=boxW+ht(n)*colW})(tree);
   var h='';
@@ -201,7 +201,7 @@ function bracket(C,div){
       h+=line(kid.x+','+kid.y+' '+n.x+','+kid.y+' '+n.x+','+n.y,k);
       if(t&&t.v)h+=stag(n.x-12,kid.y-3,t.v[side]);
       draw(kid)});
-    h+='<text x="'+(n.x+4)+'" y="'+(n.y-4)+'" font-size="8.5" class="sub">'+n.id+'</text>';
+    h+='<text x="'+(n.x+4)+'" y="'+(n.y+12)+'" font-size="8.5" class="sub">'+n.id+'</text>';
   })(tree);
   var rt=T[root];
   h+=line(tree.x+','+tree.y+' '+(W-champW-2)+','+tree.y,rt&&rt.win?'win':null);
@@ -245,8 +245,7 @@ function viewInfo(){
   '<div class="card"><h2>座席表</h2><a class="seat" href="img/seat.webp" target="_blank" rel="noopener"><img src="img/seat.webp" alt="ぴょこたんカップ2026 座席表（コートA・B、各チームの応援席と待機場所）" loading="lazy" width="1100" height="1561"></a><p class="note">画像を押すと大きく表示できます。</p></div>'+
   '<div class="card"><h2>競技方法</h2><ul class="rules">'+
    ['オフィシャルの部：小学3〜6年生の男女20名までのチーム（試合人数12名）。3年生だけのチームは参加できません。','ジュニアの部：小学1〜4年生の男女15名までのチーム（試合人数8名）。4年生だけのチームは参加できません。','ルールはJ.D.B.A.公式ルールに沿って行います（一部ローカルルールあり）。','予選リーグは5分1セットマッチの総当たり戦。勝ち2点・引き分け1点・負け0点の勝点で順位を決めます。','勝点が同じときは ①内野人数の合計が多い ②相手の内野人数の合計が少ない ③直接対戦の勝者 ④順位決定戦（リーグ代表が決まらない場合のみ）の順で決めます。','各ブロック上位3チームが決勝トーナメントへ進みます。','決勝トーナメントは準決勝まで5分1セットマッチ。ジュニアのみ3位決定戦（5分1セット）があります。','決勝戦は5分3セットマッチで、2セット先取したチームの勝ちです。','セット終了時に内野人数が同じときは延長Vポイント（その状態からジャンプボールで再開し、最初にアウトを取ったチームの勝ち）。','フェアプレー精神で試合に臨みましょう。審判への抗議や相手チームへの中傷・挑発、応援席からの指示や抗議は禁止です。','試合球は MGJDB-L 公認球です。'].map(function(t){return '<li>'+t+'</li>'}).join('')+'</ul></div>'+
-  '<div class="card"><h2>参加チーム（2部門・26チーム）</h2>'+['OF','JR'].map(function(d){return '<h3>'+DIV[d].nm+'</h3>'+DIV[d].blocks.map(function(b){return '<p class="note"><b style="color:var(--ink)">'+BLK[b].nm+'</b>　'+BLK[b].t.map(esc).join('・')+'</p>'}).join('')}).join('')+'</div>'+
-  '<div class="card"><h2>大会役員</h2><dl class="info"><dt>大会会長</dt><dd>水野 吉近（岐阜県ドッジボール協会 会長）</dd><dt>実行委員長</dt><dd>間宮 嘉治（岐阜県ドッジボール協会 理事長）</dd><dt>事務局長</dt><dd>後藤 聖子（岐阜県ドッジボール協会 理事）</dd><dt>審判長</dt><dd>清水 裕子（岐阜県ドッジボール協会 競技委員長）</dd><dt>審判員</dt><dd>一般財団法人 日本ドッジボール協会公認審判員</dd></dl></div>';
+  '<div class="card"><h2>参加チーム（26チーム）</h2><div class="teams">'+Object.keys(BLK).map(function(b){return BLK[b].t.map(function(n){return '<span class="tm '+BLK[b].div+'">'+esc(n)+'</span>'}).join('')}).join('')+'</div><p class="note"><span class="tm OF">オフィシャルの部</span> 11チーム　<span class="tm JR">ジュニアの部</span> 15チーム</p></div>'+'<div class="card"><h2>大会役員</h2><dl class="info"><dt>大会会長</dt><dd>水野 吉近（岐阜県ドッジボール協会 会長）</dd><dt>実行委員長</dt><dd>間宮 嘉治（岐阜県ドッジボール協会 理事長）</dd><dt>事務局長</dt><dd>後藤 聖子（岐阜県ドッジボール協会 理事）</dd><dt>審判長</dt><dd>清水 裕子（岐阜県ドッジボール協会 競技委員長）</dd><dt>審判員</dt><dd>一般財団法人 日本ドッジボール協会公認審判員</dd></dl></div>';
 }
 
 /* ---------- 管理者 ---------- */
@@ -280,7 +279,7 @@ function render(){
   if(tab==='entry'&&!isAdmin())tab='login';
   var th=document.documentElement.getAttribute('data-theme');
   var body=tab==='league'?viewLeague(C):tab==='tour'?viewTour(C):tab==='info'?viewInfo():tab==='entry'?viewEntry(C):tab==='login'?viewLogin():viewSched(C);
-  var tabs=[['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour],['info','要項',ICON.info]];
+  var tabs=[['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour]];
   if(isAdmin())tabs.push(['entry','入力',ICON.entry]);
   var y=window.scrollY;
   document.getElementById('app').innerHTML=

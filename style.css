@@ -13,7 +13,7 @@
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#071433;--surface:#10224D;--surface2:#16295A;--ink:#F5F2EA;--muted:#A9B4D2;--line:#25407A;
+  --bg:#071433;--surface:#22232B;--surface2:#2E2F38;--ink:#F5F2EA;--muted:#B4B2AC;--line:#43444F;
   --ok-soft:rgba(22,154,73,.2);--path-none:#2C447C;--path-lose:#5AA9E6;
   --shadow:0 10px 26px rgba(0,0,0,.45);
 }
@@ -289,3 +289,12 @@ footer .wrap{padding-block:6px 30px;display:grid;justify-items:center;gap:4px}
 @media (prefers-reduced-motion:reduce){
   #intro.go .pic,#intro.go .t1,#intro.go .t2,#intro.go .when{animation:fadeup .4s ease forwards}
   #intro{transition:opacity .5s}#intro.out{clip-path:none;opacity:0}}
+
+.teams{display:flex;flex-wrap:wrap;gap:6px}
+.tm{display:inline-block;font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--surface2);border:1.5px solid var(--of);line-height:1.3}
+.tm.JR{border-color:var(--jr)}
+:root[data-theme="dark"] .tm.OF{border-color:#6F8FE0}
+.note .tm{font-size:11px;padding:1px 8px}
+:root[data-theme="dark"] header.top{background:rgba(8,25,74,.96)}
+:root[data-theme="dark"] .bottomnav{background:#0B1C49;border-top-color:#25407A}
+:root[data-theme="dark"] .match.empty{border-color:#2C447C}
