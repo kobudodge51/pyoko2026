@@ -550,3 +550,17 @@ body.wide .refresh{display:none}
 .bk .third{fill:#FBE7D6;stroke:#B5652E;stroke-width:1.5}
 .bk .thtx{fill:#6B3410;font-weight:700}
 :root[data-theme="dark"] .bk .third{fill:#3A2A20}:root[data-theme="dark"] .bk .thtx{fill:#F3C9A6}
+/* 決勝のセット表 */
+.setbox{border-top:1px dashed var(--line);padding-top:6px;display:grid;gap:3px;font-size:12px}
+.setbox .st-h,.setbox .st-r{display:grid;grid-template-columns:minmax(0,1fr) repeat(3,40px) 44px;gap:3px;align-items:center}
+.setbox .st-h{font-size:10px;color:var(--muted);font-weight:700}
+.setbox .st-h b,.setbox .st-r b{text-align:center;font-weight:700}
+.setbox .st-r span{font-weight:700;word-break:keep-all;overflow-wrap:anywhere;line-height:1.2}
+.setbox .st-r b{background:var(--surface2);border-radius:6px;padding:3px 0;font-variant-numeric:tabular-nums;position:relative}
+.setbox .st-r b.won{background:var(--red);color:#fff}
+.setbox .st-r b.na{color:var(--muted)}
+.setbox .st-r b s{font-size:.8em;opacity:.7;margin-right:2px;text-decoration-color:currentColor}
+.setbox .st-r b i{font-style:normal;font-size:8px;margin-left:1px;vertical-align:4px}
+.setbox b.tot{font-family:var(--pop);font-size:15px;font-weight:400;background:var(--navy)!important;color:#fff!important}
+.setbox .st-h b.tot{background:none!important;color:var(--muted)!important;font-family:var(--font);font-size:10px;font-weight:700}
+.setbox p{margin:2px 0 0;font-size:11px;color:var(--muted)}
