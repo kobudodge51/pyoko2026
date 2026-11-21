@@ -387,7 +387,7 @@ function render(){
   var tabs=[['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour],['bingo','BINGO',ICON.bingo],['spon','協賛',ICON.spon]];
   if(isAdmin())tabs.push(['entry','入力',ICON.entry]);
   var y=window.scrollY,ae=document.activeElement,aid=ae&&ae.id&&/^in-/.test(ae.id)?ae.id:null,sel0=aid&&ae.selectionStart!=null?[ae.selectionStart,ae.selectionEnd]:null;
-  document.body.classList.toggle('wide',tab==='entry'||tab==='bingo');
+  document.body.classList.toggle('wide',tab==='entry'||tab==='bingo'||tab==='spon');
   document.getElementById('app').innerHTML=
    '<header class="top"><div class="wrap"><div class="logo"><img class="ttl-img" src="img/title.webp" alt="ぴょこたんカップ2026" width="1344" height="216"><div class="meta"><span class="live'+(online?' on':'')+'"></span>'+(online?'LIVE 速報中':'速報ページ')+(VIS?'<span class="visits" title="アクセス数">🎁 <b>'+Number(VIS.total).toLocaleString('ja-JP')+'</b>（今日 '+Number(VIS.today).toLocaleString('ja-JP')+'）</span>':'')+'</div></div>'+
    '<div class="themesw" role="group" aria-label="表示モード"><button type="button" data-th="light" aria-label="ライトモード" aria-pressed="'+(th!=='dark')+'">'+ICON.sun+'</button><button type="button" data-th="dark" aria-label="ダークモード" aria-pressed="'+(th==='dark')+'">'+ICON.moon+'</button></div></div></header>'+
