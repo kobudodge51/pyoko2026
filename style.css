@@ -434,3 +434,23 @@ body.wide .refresh{display:none}
 @media (prefers-reduced-motion:reduce){#bingo-show.on .drum .rot,#bingo-show.on .drum .crank,#bingo-show.on .chara{animation:none}#bingo-show.reveal .bs-ball .ball{animation:none;opacity:1;transform:none}#bingo-show.reveal .bs-num{animation:none;opacity:1}}
 .bottomnav button span{white-space:nowrap;font-size:9.5px;letter-spacing:-.02em}
 .refresh{display:none!important}
+
+/* ===== 協賛企業 ===== */
+.sp-hero{position:relative;overflow:hidden;border-radius:22px;padding:20px 18px;color:#fff;text-align:center;display:grid;gap:4px;
+  background:radial-gradient(120% 90% at 50% 10%,#2A55C4 0%,#0E2A6E 55%,#06143F 100%);box-shadow:0 14px 30px rgba(8,25,74,.3)}
+.sp-hero::after{content:"";position:absolute;inset:auto 0 0;height:6px;background:repeating-linear-gradient(-45deg,var(--red) 0 8px,#fff 8px 16px,var(--green) 16px 24px,#fff 24px 32px)}
+.sp-hero small{font-weight:700;color:#FFE27A;letter-spacing:.1em;font-size:12px}
+.sp-hero h2.sp-t{justify-content:center;font-size:28px;color:#fff;margin:2px 0}.sp-hero h2.sp-t::before{display:none}
+.sp-hero p{margin:0;font-size:12.5px;color:#DCE4FF;font-weight:700}
+.sp-20{display:inline-block;margin-left:6px;font-family:var(--pop);color:#FFE27A}.sp-20 i{font-style:normal;font-size:10px;color:#DCE4FF;margin-left:3px}
+.sp-thx{margin-top:6px!important;color:#fff!important;font-size:14px!important}
+.sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}
+.sp-card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:26px 14px 12px;display:grid;gap:10px;box-shadow:var(--shadow);margin-top:10px}
+.sp-cat{position:absolute;top:-12px;left:14px;margin:0;font-family:var(--pop);font-weight:400;font-size:13.5px;color:#fff;padding:4px 16px;border-radius:8px;background:linear-gradient(135deg,#1B2140,#0E2A6E);transform:skewX(-8deg);box-shadow:0 4px 10px rgba(14,42,110,.25)}
+.sp-co{display:grid;gap:2px;padding-left:10px;border-left:3px solid var(--red)}
+.sp-co+.sp-co{margin-top:4px}
+.sp-co b{font-size:15px}
+.sp-co em{font-style:normal;font-size:12px;color:var(--green);font-weight:700}
+.sp-co span{font-size:12.5px;color:var(--muted)}
+.sp-hold{display:grid;gap:2px;text-align:center;padding:14px;border-radius:14px;background:var(--surface2);border:1px dashed var(--line)}
+.sp-hold small{color:var(--muted);font-weight:700;font-size:11px}.sp-hold b{font-size:16px}.sp-hold span{font-size:12.5px;color:var(--muted)}

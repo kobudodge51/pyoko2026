@@ -109,6 +109,7 @@ function tourMatches(C){return TOUR.map(function(d){var t=C.T[d.id];return {key:
 
 /* ---------- 部品 ---------- */
 var ICON={
+  spon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-5 9 5v12"/><path d="M8 21v-6h8v6M3 21h18"/></svg>',
   bingo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><circle cx="12" cy="12" r="3.2"/></svg>',
   sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',
   moon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1z"/></svg>',
@@ -312,6 +313,22 @@ function saveRow(k,goNext){
   once(rpc('pk26_save_result',{p_key:k,p_a:a,p_b:b,p_w:w}).then(function(r){if(r.error)throw r.error;state.scores[k]={a:a,b:b,w:w};delete drafts[k];render();
     toast('保存しました：'+m.a+' '+a+' - '+b+' '+m.b);if(goNext)focusNext(k)}).catch(werr));
 }
+/* ---------- 協賛企業 ---------- */
+var SPON=[
+ ['人材派遣・人材紹介',[['株式会社人材Bank','人も企業も支えあって生きている。','〒500-8282 岐阜県岐阜市西部大川1丁目51番地'],['株式会社アップルスタッフ','人も企業も支えあって生きている。','〒457-0863 愛知県名古屋市南区豊三丁目27番19号 第三スカイマンション202']]],
+ ['求人媒体',[['株式会社アールエーピー','ぶらっとくる求人広告「じょ〜ぶ」「じょ〜ぶ.ねっと」','〒500-8356 岐阜県岐阜市六条江東1丁目1番3号']]],
+ ['コンサルティング',[['株式会社ＪＢＧコンサルティング','会計Bank／ほけんBank','〒500-8282 岐阜県岐阜市西部大川1丁目51番地']]],
+ ['美容',[['キングスサロン MEGAドン・キホーテ岐阜瑞穂店','KING\'S SALON','〒501-0224 岐阜県瑞穂市稲里580-1']]],
+ ['教育',[['ＪＰＣスポーツ教室','','岐阜店：〒501-1153 岐阜県岐阜市又丸畑27-8<br>岐南店：〒501-6003 岐阜県羽島郡岐南町平島8丁目64番地']]],
+ ['PC・WEB',[['株式会社ワンステップ','ONE STEP','〒500-8356 岐阜県岐阜市六条江東1丁目1番3号']]],
+ ['医療・福祉施設',[['株式会社フリーデン','サービス付き高齢者向け住宅 嘉悦館','〒500-8269 岐阜県岐阜市西部中島1丁目28番地'],['株式会社フリーデン','訪問看護ステーション 平和ケア','〒500-8268 岐阜県岐阜市西部菱野1丁目46番地']]]
+];
+function viewSpon(){
+  var h='<section class="sp-hero"><small>ぴょこたんカップ2026 協賛</small><h2 class="sp-t">人材Bankグループ</h2><p>JBG（Jinzai Bank Group）Holdings　<span class="sp-20">20th <i>since 2006</i></span></p><p class="sp-thx">大会へのご協賛、ありがとうございます。</p></section>';
+  h+='<div class="sp-grid">'+SPON.map(function(g){return '<section class="sp-card"><h3 class="sp-cat">'+esc(g[0])+'</h3>'+g[1].map(function(c){return '<div class="sp-co"><b>'+esc(c[0])+'</b>'+(c[1]?'<em>'+esc(c[1])+'</em>':'')+'<span>'+c[2]+'</span></div>'}).join('')+'</section>'}).join('')+'</div>';
+  h+='<div class="sp-hold"><small>グループ本社</small><b>ＪＢＧホールディングス株式会社</b><span>〒500-8282 岐阜県岐阜市西部大川1丁目51番地</span></div>';
+  return h;
+}
 /* ---------- BINGO ---------- */
 function bingoList(){var a=[];Object.keys(state.scores).forEach(function(k){if(/^bg\d+$/.test(k)){var v=state.scores[k];a.push({n:v.a,seq:v.b,key:k})}});return a.sort(function(x,y){return x.seq-y.seq})}
 var bingoSeen=null;
@@ -364,8 +381,8 @@ function render(){
   var C;try{C=compute()}catch(e){console.error(e);return}
   if(tab==='entry'&&!isAdmin())tab='login';
   var th=document.documentElement.getAttribute('data-theme');
-  var body=tab==='bingo'?viewBingo():tab==='league'?viewLeague(C):tab==='tour'?viewTour(C):tab==='info'?viewInfo():tab==='entry'?viewEntry(C):tab==='login'?viewLogin():viewSched(C);
-  var tabs=[['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour],['bingo','BINGO',ICON.bingo]];
+  var body=tab==='spon'?viewSpon():tab==='bingo'?viewBingo():tab==='league'?viewLeague(C):tab==='tour'?viewTour(C):tab==='info'?viewInfo():tab==='entry'?viewEntry(C):tab==='login'?viewLogin():viewSched(C);
+  var tabs=[['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour],['bingo','BINGO',ICON.bingo],['spon','協賛',ICON.spon]];
   if(isAdmin())tabs.push(['entry','入力',ICON.entry]);
   var y=window.scrollY,ae=document.activeElement,aid=ae&&ae.id&&/^in-/.test(ae.id)?ae.id:null,sel0=aid&&ae.selectionStart!=null?[ae.selectionStart,ae.selectionEnd]:null;
   document.body.classList.toggle('wide',tab==='entry');
