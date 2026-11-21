@@ -475,11 +475,10 @@ body.wide .refresh{display:none}
 .sp-shot{width:max-content;max-width:min(100%,320px)}
 .sp-shot img{width:auto;max-width:100%;max-height:150px}
 /* 協賛：横に並べる */
-.sp-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));align-items:stretch}
-.sp-card{align-content:start}
-.sp-card:has(.sp-co+.sp-co){grid-column:span 2}
-.sp-card:has(.sp-co+.sp-co){grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));column-gap:16px}
-.sp-card .sp-co+.sp-co{margin-top:0}
-.sp-shot{max-width:100%}
-.sp-shot img{max-height:170px}
-@media (max-width:760px){.sp-card:has(.sp-co+.sp-co){grid-column:auto}}
+.sp-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));align-items:stretch}
+.sp-card{align-content:start;min-width:0}
+.sp-co{align-content:start;min-width:0}
+.sp-link{min-width:0}
+.sp-shot,.sp-shot img{width:100%;max-width:100%}
+.sp-shot img{height:auto;max-height:none;aspect-ratio:2.2/1;object-fit:cover;object-position:center}
+.sp-shot img{object-fit:contain;background:#fff}
