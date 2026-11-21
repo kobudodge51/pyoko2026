@@ -472,3 +472,5 @@ body.wide .refresh{display:none}
   .bg-hist .ball.sm{width:56px;height:56px}.bg-hist .ball.sm b{font-size:22px}
   .bg-c{font-size:16px;padding:8px 0}
 }
+.sp-shot{width:max-content;max-width:min(100%,320px)}
+.sp-shot img{width:auto;max-width:100%;max-height:150px}
