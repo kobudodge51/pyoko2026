@@ -500,3 +500,24 @@ body.wide .refresh{display:none}
 .bw-in small{font-weight:700;font-size:16px;opacity:.9}
 @keyframes bwpop{0%{transform:scale(.3) rotate(-8deg);opacity:0}100%{transform:none;opacity:1}}
 @keyframes bwfade{from{opacity:0}}
+/* BINGO終了 */
+.bingo-stage.ended .drum .rot,.bingo-stage.ended .drum .crank,.bingo-stage.ended .chara{animation:none!important}
+.bingo-stage.ended .bg-machine{opacity:.55;filter:grayscale(.3)}
+.bg-end{position:relative;display:grid;justify-items:center;gap:4px;padding:12px 20px;margin:4px 0 2px;border-radius:16px;background:linear-gradient(135deg,#F0393E,#B8141B);border:3px solid #FFE27A;box-shadow:0 10px 24px rgba(0,0,0,.35);transform:rotate(-2deg)}
+.bg-end b{font-family:var(--pop);font-weight:400;font-size:clamp(26px,8vw,34px);color:#FFE27A;text-shadow:0 3px 0 #7A0F12;letter-spacing:.04em}
+.bg-end span{font-weight:700;font-size:14px}
+.bg-end small{font-weight:700;font-size:12px;color:#FFE6E6}
+/* 仮装コンテスト */
+.kaso{position:relative;overflow:hidden;border-radius:22px;padding:18px 16px;display:grid;gap:12px;color:#fff;
+  background:radial-gradient(110% 80% at 50% 0%,#1DB257 0%,#0D7536 55%,#064A22 100%);box-shadow:0 14px 30px rgba(13,117,54,.3)}
+.kaso::after{content:"";position:absolute;inset:auto 0 0;height:6px;background:repeating-linear-gradient(-45deg,var(--red) 0 8px,#fff 8px 16px,var(--gold) 16px 24px,#fff 24px 32px)}
+.ks-h{display:grid;justify-items:center;gap:4px;text-align:center}
+.ks-h h2{color:#fff;font-size:24px;justify-content:center}.ks-h h2::before{display:none}
+.ks-h p{margin:0;font-size:12.5px;font-weight:700;color:#DFF5E6}
+.ks-tag{background:var(--gold);color:#3A2A00;font-weight:700;font-size:12px;padding:2px 12px;border-radius:999px}
+.ks-list{list-style:none;margin:0;padding:0 0 6px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:8px}
+.ks-list li{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.95);color:var(--navy);box-shadow:0 4px 10px rgba(0,0,0,.15)}
+.ks-list li.hl{outline:3px solid var(--gold)}
+.ks-list i{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;font-style:normal;font-family:var(--pop);color:#fff;background:linear-gradient(135deg,#F0393E,#B8141B);box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.ks-list b{font-size:15px;line-height:1.3;word-break:keep-all;overflow-wrap:anywhere}
+.bg-layout{margin-top:0}

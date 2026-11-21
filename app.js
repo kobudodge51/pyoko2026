@@ -332,10 +332,13 @@ function viewSpon(){
 function bingoList(){var a=[];Object.keys(state.scores).forEach(function(k){if(/^bg\d+$/.test(k)){var v=state.scores[k];a.push({n:v.a,seq:v.b,key:k,t:v.t})}});return a.sort(function(x,y){return x.seq-y.seq})}
 function winList(){var a=[];Object.keys(state.scores).forEach(function(k){if(/^bw\d+$/.test(k)){var v=state.scores[k];a.push({no:v.a,key:k,t:v.t})}});return a.sort(function(x,y){return x.no-y.no})}
 var winSeen=null;
-function checkWins(){var W=winList(),mx=W.length?W[W.length-1].no:0;if(winSeen===null){winSeen=mx;return}if(mx>winSeen){winSeen=mx;showWin(mx,W[W.length-1].t)}else winSeen=mx}
+function checkWins(){if(BINGO_END){winSeen=0;return}var W=winList(),mx=W.length?W[W.length-1].no:0;if(winSeen===null){winSeen=mx;return}if(mx>winSeen){winSeen=mx;showWin(mx,W[W.length-1].t)}else winSeen=mx}
 function showWin(no,t){var el=document.createElement('div');el.className='bw-pop';el.innerHTML='<div class="bw-in"><b>BINGO!!</b><span>'+no+'人目</span><small>'+hm(t||new Date().toISOString())+'</small></div>';document.body.appendChild(el);setTimeout(function(){el.classList.add('out')},3600);setTimeout(function(){el.remove()},4200);el.addEventListener('click',function(){el.remove()})}
+var BINGO_END=true;
+var KASO=["サザン’97","Genki Kids","Soul West","TRICK SQUARE","ひだ闘球Monsters","ガンバベアーズ","Catching☆Star Jr.・Merveille☆Star","TOYOTA KATTZ"];
+function kasoHTML(){return '<section class="kaso"><div class="ks-h"><span class="ks-tag">午後開催</span><h2>🎅 仮装コンテスト</h2><p>エントリーナンバー順</p></div><ol class="ks-list">'+KASO.map(function(n,i){var hl=filter&&n.indexOf(filter)>=0;return '<li'+(hl?' class="hl"':'')+'><i>'+(i+1)+'</i><b>'+esc(n)+'</b></li>'}).join('')+'</ol></section>'}
 var bingoSeen=null;
-function checkBingo(){var L=bingoList(),mx=L.length?L[L.length-1].seq:0;if(bingoSeen===null){bingoSeen=mx;return}if(mx>bingoSeen){bingoSeen=mx;playBingo(L[L.length-1].n,L.length)}else bingoSeen=mx}
+function checkBingo(){if(BINGO_END){bingoSeen=0;return}var L=bingoList(),mx=L.length?L[L.length-1].seq:0;if(bingoSeen===null){bingoSeen=mx;return}if(mx>bingoSeen){bingoSeen=mx;playBingo(L[L.length-1].n,L.length)}else bingoSeen=mx}
 function hm(t){if(!t)return '';var d=new Date(t);if(isNaN(d))return '';return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')}
 function col(n){return 'BINGO'[Math.min(4,Math.floor((n-1)/15))]}
 function drumSVG(){
@@ -350,9 +353,9 @@ function drumSVG(){
 }
 function viewBingo(){
   var L=bingoList(),last=L[L.length-1],called={};L.forEach(function(x){called[x.n]=x.seq});
-  var h='<div class="bg-layout"><div class="bg-left"><section class="bingo-stage"><div class="bg-title"><span>🎄</span> BINGO大会 <span>🎄</span></div><div class="bg-machine"><img class="chara c1" src="img/pyokotan.webp" alt="ぴょこたん" width="360" height="360"><div class="bg-drum">'+drumSVG()+'</div><img class="chara c2" src="img/joebull.webp" alt="ジョーブル" width="360" height="360"></div>'+
+  var h=kasoHTML()+'<div class="bg-layout"><div class="bg-left"><section class="bingo-stage'+(BINGO_END?' ended':'')+'"><div class="bg-title"><span>🎄</span> BINGO大会 <span>🎄</span></div><div class="bg-machine"><img class="chara c1" src="img/pyokotan.webp" alt="ぴょこたん" width="360" height="360"><div class="bg-drum">'+drumSVG()+'</div><img class="chara c2" src="img/joebull.webp" alt="ジョーブル" width="360" height="360"></div>'+
    '<div class="bg-names"><span>ぴょこたん</span><span>ジョーブル</span></div>'+
-   '<div class="bg-latest">'+(last?'<small>いま出た番号（'+L.length+'個目'+(hm(last.t)?'・'+hm(last.t)+'に更新':'')+'）</small><div class="ball big"><i>'+col(last.n)+'</i><b>'+last.n+'</b></div>':'<small>まだ番号は出ていません</small><div class="ball big empty"><b>?</b></div>')+'</div></section>';
+   (BINGO_END?'<div class="bg-end"><b>BINGO大会 終了！</b><span>たくさんのご参加ありがとうございました🎄</span><small>出た番号 '+L.length+'個／BINGO '+winList().length+'人</small></div>':'')+'<div class="bg-latest">'+(last?'<small>'+(BINGO_END?'最後に出た番号':'いま出た番号')+'（'+L.length+'個目'+(hm(last.t)?'・'+hm(last.t)+'に更新':'')+'）</small><div class="ball big"><i>'+col(last.n)+'</i><b>'+last.n+'</b></div>':'<small>まだ番号は出ていません</small><div class="ball big empty"><b>?</b></div>')+'</div></section>';
   var W=winList();
   h+='<div class="card bw-card"><h3>BINGO報告<span class="done">'+W.length+'人</span></h3>'+(W.length?'<ul class="bw-list">'+W.slice().reverse().map(function(w){return '<li><b>BINGO!!</b><span>'+w.no+'人目</span><small>'+hm(w.t)+'</small></li>'}).join('')+'</ul>':'<p class="note">まだBINGOの報告はありません。</p>')+(isAdmin()?'<div class="actions"><button type="button" class="btn primary" id="bw-add">🎉 BINGO報告を追加（'+(W.length+1)+'人目）</button></div>'+(W.length?'<button type="button" class="linkbtn" id="bw-undo">最後の報告（'+W.length+'人目）を取り消す</button>':''):'')+'</div>';
   if(isAdmin())h+='<div class="card bg-admin"><h3>番号を追加（管理者）</h3><form id="bingo-add" class="bg-form"><input id="bingo-num" class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="番号" aria-label="出た番号（1〜75）"><button class="btn primary" type="submit">追加して回す</button></form><p class="note">数字を入れて Enter でも追加できます。見ている全員の画面でガラガラの演出が流れます。</p>'+(last?'<button type="button" class="linkbtn" id="bingo-undo">最後の番号（'+last.n+'）を取り消す</button>':'')+'</div>';
@@ -390,7 +393,7 @@ function render(){
   if(tab==='entry'&&!isAdmin())tab='login';
   var th=document.documentElement.getAttribute('data-theme');
   var body=tab==='spon'?viewSpon():tab==='bingo'?viewBingo():tab==='league'?viewLeague(C):tab==='tour'?viewTour(C):tab==='info'?viewInfo():tab==='entry'?viewEntry(C):tab==='login'?viewLogin():viewSched(C);
-  var tabs=[['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour],['bingo','BINGO',ICON.bingo],['spon','協賛',ICON.spon]];
+  var tabs=[['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour],['bingo','イベント',ICON.bingo],['spon','協賛',ICON.spon]];
   if(isAdmin())tabs.push(['entry','入力',ICON.entry]);
   var y=window.scrollY,ae=document.activeElement,aid=ae&&ae.id&&/^in-/.test(ae.id)?ae.id:null,sel0=aid&&ae.selectionStart!=null?[ae.selectionStart,ae.selectionEnd]:null;
   document.body.classList.toggle('wide',tab==='entry'||tab==='bingo'||tab==='spon');
