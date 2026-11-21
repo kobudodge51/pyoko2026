@@ -109,6 +109,7 @@ function tourMatches(C){return TOUR.map(function(d){var t=C.T[d.id];return {key:
 
 /* ---------- 部品 ---------- */
 var ICON={
+  bingo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><circle cx="12" cy="12" r="3.2"/></svg>',
   sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',
   moon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1z"/></svg>',
   sched:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M7.5 14h3M13.5 14h3M7.5 17.5h3"/></svg>',
@@ -311,6 +312,51 @@ function saveRow(k,goNext){
   once(rpc('pk26_save_result',{p_key:k,p_a:a,p_b:b,p_w:w}).then(function(r){if(r.error)throw r.error;state.scores[k]={a:a,b:b,w:w};delete drafts[k];render();
     toast('保存しました：'+m.a+' '+a+' - '+b+' '+m.b);if(goNext)focusNext(k)}).catch(werr));
 }
+/* ---------- BINGO ---------- */
+function bingoList(){var a=[];Object.keys(state.scores).forEach(function(k){if(/^bg\d+$/.test(k)){var v=state.scores[k];a.push({n:v.a,seq:v.b,key:k})}});return a.sort(function(x,y){return x.seq-y.seq})}
+var bingoSeen=null;
+function checkBingo(){var L=bingoList(),mx=L.length?L[L.length-1].seq:0;if(bingoSeen===null){bingoSeen=mx;return}if(mx>bingoSeen){bingoSeen=mx;playBingo(L[L.length-1].n,L.length)}else bingoSeen=mx}
+function col(n){return 'BINGO'[Math.min(4,Math.floor((n-1)/15))]}
+function drumSVG(){
+  var spokes='';for(var i=0;i<8;i++){var a=i*Math.PI/4;spokes+='<line x1="0" y1="0" x2="'+(Math.cos(a)*58).toFixed(1)+'" y2="'+(Math.sin(a)*58).toFixed(1)+'" stroke="#3A3A42" stroke-width="2"/>'}
+  var oct='';for(var j=0;j<8;j++){var b=j*Math.PI/4+Math.PI/8;oct+=(j?' ':'')+(Math.cos(b)*70).toFixed(1)+','+(Math.sin(b)*70).toFixed(1)}
+  return '<svg class="drum" viewBox="-110 -100 220 210" aria-hidden="true"><defs><radialGradient id="dg" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#55555F"/><stop offset=".45" stop-color="#1B1B21"/><stop offset="1" stop-color="#050507"/></radialGradient><linearGradient id="dl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A6A3A"/><stop offset="1" stop-color="#4A3418"/></linearGradient></defs>'+
+   '<path d="M-60 95 L-22 10 M60 95 L22 10" stroke="url(#dl)" stroke-width="9" stroke-linecap="round"/><rect x="-80" y="90" width="160" height="12" rx="6" fill="url(#dl)"/>'+
+   '<path d="M-36 92 h40 l6 -10 h-40z" fill="#C8A24A" opacity=".0"/>'+
+   '<g class="rot"><polygon points="'+oct+'" fill="url(#dg)" stroke="#000" stroke-width="3"/>'+spokes+'<polygon points="'+oct+'" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.5" transform="scale(.82)"/><circle r="9" fill="#C9A24C" stroke="#6B5220" stroke-width="2"/></g>'+
+   '<g class="crank"><line x1="0" y1="0" x2="0" y2="-46" stroke="#B9BAC4" stroke-width="6" stroke-linecap="round"/><circle cy="-50" r="8" fill="#E1262B" stroke="#7A0F12" stroke-width="2"/></g>'+
+   '<ellipse cx="-36" cy="94" rx="22" ry="6" fill="#3A2A10"/></svg>';
+}
+function viewBingo(){
+  var L=bingoList(),last=L[L.length-1],called={};L.forEach(function(x){called[x.n]=x.seq});
+  var h='<section class="bingo-stage"><div class="bg-title"><span>🎄</span> BINGO大会 <span>🎄</span></div><div class="bg-machine"><img class="chara c1" src="img/pyokotan.webp" alt="ぴょこたん" width="360" height="360"><div class="bg-drum">'+drumSVG()+'</div><img class="chara c2" src="img/joebull.webp" alt="ジョーブル" width="360" height="360"></div>'+
+   '<div class="bg-names"><span>ぴょこたん</span><span>ジョーブル</span></div>'+
+   '<div class="bg-latest">'+(last?'<small>いま出た番号（'+L.length+'個目）</small><div class="ball big"><i>'+col(last.n)+'</i><b>'+last.n+'</b></div>':'<small>まだ番号は出ていません</small><div class="ball big empty"><b>?</b></div>')+'</div></section>';
+  if(isAdmin())h+='<div class="card bg-admin"><h3>番号を追加（管理者）</h3><form id="bingo-add" class="bg-form"><input id="bingo-num" class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="番号" aria-label="出た番号（1〜75）"><button class="btn primary" type="submit">追加して回す</button></form><p class="note">数字を入れて Enter でも追加できます。見ている全員の画面でガラガラの演出が流れます。</p>'+(last?'<button type="button" class="linkbtn" id="bingo-undo">最後の番号（'+last.n+'）を取り消す</button>':'')+'</div>';
+  h+='<div class="card"><h3>出た番号（新しい順）<span class="done">'+L.length+'個</span></h3>'+(L.length?'<div class="bg-hist">'+L.slice().reverse().map(function(x,i){return '<span class="ball sm'+(i===0?' new':'')+'"><i>'+x.seq+'</i><b>'+x.n+'</b></span>'}).join('')+'</div>':'<p class="note">番号が出ると、ここに順番に並びます。聞き逃しても、ここで確認できます。</p>')+'</div>';
+  h+='<div class="card"><h3>番号表</h3><div class="bg-grid">'+['B','I','N','G','O'].map(function(c,ci){var cells='<div class="bg-col"><div class="bg-h">'+c+'</div>';for(var n=ci*15+1;n<=ci*15+15;n++)cells+='<div class="bg-c'+(called[n]?' on':'')+(last&&last.n===n?' last':'')+'">'+n+'</div>';return cells+'</div>'}).join('')+'</div><p class="note">色が付いている番号が、すでに出た番号です。</p></div>';
+  return h;
+}
+var bingoTimer=null;
+function playBingo(n,cnt){
+  var old=document.getElementById('bingo-show');if(old)old.remove();clearTimeout(bingoTimer);
+  var el=document.createElement('div');el.id='bingo-show';el.setAttribute('role','dialog');el.setAttribute('aria-label','BINGO '+n+'番');
+  var conf='';for(var i=0;i<26;i++)conf+='<i style="left:'+(Math.random()*100).toFixed(0)+'%;background:'+['#E1262B','#169A49','#F6B800','#fff','#6BB7E8'][i%5]+';--d:'+(Math.random()*.6).toFixed(2)+'s;--x:'+(Math.random()*120-60).toFixed(0)+'px"></i>';
+  el.innerHTML='<div class="bs-in"><div class="bs-top">'+cnt+'個目の番号は…</div><div class="bg-machine spin"><img class="chara c1" src="img/pyokotan.webp" alt=""><div class="bg-drum">'+drumSVG()+'</div><img class="chara c2" src="img/joebull.webp" alt=""></div><div class="bs-ball"><div class="ball big"><i>'+col(n)+'</i><b>'+n+'</b></div></div><div class="bs-num">'+col(n)+' - '+n+' <small>番！</small></div><div class="conf">'+conf+'</div><button type="button" class="bs-close">閉じる</button></div>';
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){el.classList.add('on')});
+  setTimeout(function(){el.classList.add('reveal')},2300);
+  function close(){el.classList.add('out');setTimeout(function(){el.remove()},400)}
+  el.addEventListener('click',close);bingoTimer=setTimeout(close,8000);
+  try{navigator.vibrate&&navigator.vibrate([30,60,30])}catch(e){}
+}
+function addBingo(){
+  var inp=document.getElementById('bingo-num');if(!inp)return;var v=inp.value.replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-65248)}).replace(/\D/g,'');
+  var n=+v;if(!v||n<1||n>75){toast('1〜75の番号を入れてください');return}
+  var L=bingoList();if(L.some(function(x){return x.n===n})){toast(n+'番はもう出ています');inp.select();return}
+  var seq=(L.length?L[L.length-1].seq:0)+1,key='bg'+(n<10?'0':'')+n;
+  once(rpc('pk26_save_result',{p_key:key,p_a:n,p_b:seq,p_w:null}).then(function(r){if(r.error)throw r.error;state.scores[key]={a:n,b:seq,w:null};bingoSeen=seq;render();playBingo(n,L.length+1);var i2=document.getElementById('bingo-num');if(i2){i2.value='';i2.focus()}}).catch(werr));
+}
 /* ---------- 画面 ---------- */
 var toastT=null;
 function toast(t){var el=document.querySelector('.toast');if(!el){el=document.createElement('div');el.className='toast';el.setAttribute('role','status');document.body.appendChild(el)}el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){el.hidden=true},2600)}
@@ -318,8 +364,8 @@ function render(){
   var C;try{C=compute()}catch(e){console.error(e);return}
   if(tab==='entry'&&!isAdmin())tab='login';
   var th=document.documentElement.getAttribute('data-theme');
-  var body=tab==='league'?viewLeague(C):tab==='tour'?viewTour(C):tab==='info'?viewInfo():tab==='entry'?viewEntry(C):tab==='login'?viewLogin():viewSched(C);
-  var tabs=[['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour]];
+  var body=tab==='bingo'?viewBingo():tab==='league'?viewLeague(C):tab==='tour'?viewTour(C):tab==='info'?viewInfo():tab==='entry'?viewEntry(C):tab==='login'?viewLogin():viewSched(C);
+  var tabs=[['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour],['bingo','BINGO',ICON.bingo]];
   if(isAdmin())tabs.push(['entry','入力',ICON.entry]);
   var y=window.scrollY,ae=document.activeElement,aid=ae&&ae.id&&/^in-/.test(ae.id)?ae.id:null,sel0=aid&&ae.selectionStart!=null?[ae.selectionStart,ae.selectionEnd]:null;
   document.body.classList.toggle('wide',tab==='entry');
@@ -340,7 +386,7 @@ function render(){
 function stamp(){var d=new Date();lastSync=d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')}
 function loadAll(){if(!sb)return Promise.resolve(false);
   return Promise.all([sb.from('pk26_results').select('key,a,b,w'),sb.from('pk26_settings').select('adj').eq('id',1).maybeSingle()]).then(function(r){
-    if(r[0].error)throw r[0].error;var s={};(r[0].data||[]).forEach(function(x){s[x.key]={a:x.a,b:x.b,w:x.w}});state.scores=s;
+    if(r[0].error)throw r[0].error;var s={};(r[0].data||[]).forEach(function(x){s[x.key]={a:x.a,b:x.b,w:x.w}});state.scores=s;setTimeout(checkBingo,30);
     state.adj=(r[1].data&&r[1].data.adj)||{};loaded=true;loadError='';stamp();if(tab!=='login')render();return true;
   }).catch(function(e){console.error(e);loadError=loaded?'':'結果の読み込みに失敗しました。電波の良い場所で「最新情報に更新」を押してください。';render();return false});
 }
@@ -364,6 +410,7 @@ document.addEventListener('click',function(e){
       else{if(b)b.classList.remove('busy');toast('読み込めませんでした。電波を確認してもう一度押してください')}});
     return}
   if(e.target.closest('#logout')){cred=null;ls('pk26-cred',null);tab='sched';render();toast('ログアウトしました');return}
+  if(e.target.closest('#bingo-undo')&&isAdmin()&&!busy){var L=bingoList(),la=L[L.length-1];if(la&&window.confirm(la.n+'番を取り消しますか？')){once(rpc('pk26_delete_result',{p_key:la.key}).then(function(r){if(r.error)throw r.error;delete state.scores[la.key];bingoSeen=L.length>1?L[L.length-2].seq:0;render();toast(la.n+'番を取り消しました')}).catch(werr))}return}
   if(!isAdmin()||busy)return;
   t=e.target.closest('[data-save]');if(t){saveRow(t.getAttribute('data-save'),true);return}
   t=e.target.closest('[data-del]');if(t){var dk=t.getAttribute('data-del'),dm=findM(dk);if(!window.confirm((dm.a||'')+' × '+(dm.b||'')+' の結果を消しますか？'))return;once(rpc('pk26_delete_result',{p_key:dk}).then(function(r){if(r.error)throw r.error;delete state.scores[dk];delete drafts[dk];render();toast('結果を消しました')}).catch(werr));return}
@@ -393,7 +440,7 @@ function moveRow(k,sd,d){var rows=[].slice.call(document.querySelectorAll('tr.er
   for(var j=i+d;j>=0&&j<rows.length;j+=d){var inp=rows[j].querySelector('input.num[data-s="'+(sd==='w'?'a':sd)+'"]:not([disabled])');if(inp){inp.focus();inp.select();inp.scrollIntoView({block:'nearest'});return}}}
 function focusFirst(){if(MOBILE)return;var rows=document.querySelectorAll('tr.er.empty,tr.er.dirty');for(var i=0;i<rows.length;i++){var inp=rows[i].querySelector('input.num:not([disabled])');if(inp){inp.focus();inp.select();inp.scrollIntoView({block:'center'});return}}}
 document.addEventListener('focusin',function(e){if(e.target.classList&&e.target.classList.contains('num'))e.target.select()});
-document.addEventListener('submit',function(e){
+document.addEventListener('submit',function(e){if(e.target.id==='bingo-add'){e.preventDefault();if(isAdmin()&&!busy)addBingo();return}
   if(e.target.id!=='login')return;e.preventDefault();
   var id=document.getElementById('lid').value.trim(),pw=document.getElementById('lpw').value;
   if(!sb){toast('接続の準備ができていません');return}
