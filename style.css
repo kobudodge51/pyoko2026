@@ -564,3 +564,12 @@ body.wide .refresh{display:none}
 .setbox b.tot{font-family:var(--pop);font-size:15px;font-weight:400;background:var(--navy)!important;color:#fff!important}
 .setbox .st-h b.tot{background:none!important;color:var(--muted)!important;font-family:var(--font);font-size:10px;font-weight:700}
 .setbox p{margin:2px 0 0;font-size:11px;color:var(--muted)}
+/* 決勝セット：幅が狭いカードは簡易表示 */
+.match{container-type:inline-size}
+.setmini{display:none;flex-wrap:wrap;gap:4px;border-top:1px dashed var(--line);padding-top:6px}
+.setmini span{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border-radius:8px;padding:3px 8px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.setmini em{font-style:normal;font-size:10px;color:var(--muted)}
+.setmini s{color:var(--muted);font-weight:400}
+.setmini i{font-style:normal;color:#fff;background:var(--red);border-radius:4px;padding:0 4px;font-size:10px}
+.setnote{margin:2px 0 0;font-size:11px;color:var(--muted)}
+@container (max-width:380px){.setbox{display:none}.setmini{display:flex}}
