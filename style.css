@@ -433,3 +433,4 @@ body.wide .refresh{display:none}
 @keyframes confetti{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--x),260px) rotate(540deg)}}
 @media (prefers-reduced-motion:reduce){#bingo-show.on .drum .rot,#bingo-show.on .drum .crank,#bingo-show.on .chara{animation:none}#bingo-show.reveal .bs-ball .ball{animation:none;opacity:1;transform:none}#bingo-show.reveal .bs-num{animation:none;opacity:1}}
 .bottomnav button span{white-space:nowrap;font-size:9.5px;letter-spacing:-.02em}
+.refresh{display:none!important}
