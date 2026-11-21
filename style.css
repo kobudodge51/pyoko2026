@@ -544,3 +544,4 @@ body.wide .refresh{display:none}
 .vin b{color:var(--muted)}
 .etbl .vnum{width:58px;height:40px;font-size:20px}
 .vin.on .vnum:not(:disabled){border-color:var(--gold);box-shadow:0 0 0 2px rgba(246,184,0,.3)}
+.bk .vtx{fill:var(--red)!important;font-family:var(--pop)}
