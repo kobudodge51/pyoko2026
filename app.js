@@ -248,17 +248,26 @@ function podium(C,div){
   else{var g=T.B7;rows=[['p1','優勝',g.win],['p2','準優勝',g.lose],['p3','第3位',T.B4.lose],['p3','第3位',T.B5.lose]]}
   return '<ol class="podium">'+rows.map(function(r){return '<li class="'+r[0]+'"><span class="pl">'+r[1]+'</span><span>'+(r[2]?esc(r[2]):'<span class="ph">未確定</span>')+'</span></li>'}).join('')+'</ol>';
 }
+var PREF={"SOUL MAX池田":"岐阜県","TOYOTA KATTZ":"愛知県","Soul West":"愛知県","Genki Kids":"愛知県","J Soul":"愛知県","Catching☆Star Jr.":"愛知県","ガンバベアーズjr":"岐阜県","KATTZ Jr":"愛知県"};
+var KASO_RES=[["TOYOTA KATTZ","愛知県"],["ひだ闘球Monsters","岐阜県"],["TRICK SQUARE","岐阜県"],["Catching☆Star Jr.・Merveille☆Star","岐阜県"]];
+function pf(n){return n&&PREF[n]?'<small class="pf">（'+PREF[n]+'）</small>':''}
+function champBox(label,name,pref){var sp='';for(var i=0;i<10;i++)sp+='<i style="left:'+(5+i*9.5)+'%;top:'+(i%2?18:70)+'%;animation-delay:-'+(i*.31).toFixed(2)+'s"></i>';
+  return '<div class="rc"><div class="rc-sp">'+sp+'</div><div class="rc-crown">👑</div><small>'+label+'</small><b>'+(name?esc(name):'未確定')+'</b>'+(pref?'<em>'+pref+'</em>':'')+'</div>'}
+function rmatch(m){
+  if(!m)return '';var fv=m.fin?finalV(m.id):null,v=m.fin?(fv?{a:fv.a,b:fv.b}:null):mv(m),aw=m.fin&&!(fv&&fv.done)?null:winA(v);
+  function row(nm,sd){var w=(sd==='a')===aw&&aw!==null,val=v?(m.fin?v[sd]:(vf(v,sd)||v[sd])):'–';return '<div class="rm-r'+(w?' w':'')+'"><span>'+esc(nm||'')+'</span><b>'+val+(w&&v&&!m.fin&&v.a===v.b&&v.w?'<i class="rv">V</i>':'')+'</b></div>'}
+  return '<div class="rm"><div class="rm-h">'+esc(m.r)+'<span>'+m.id+'</span></div>'+row(m.a,'a')+row(m.b,'b')+(fv?'<div class="rm-s">'+fv.sets.map(function(x,i){if(!x)return '';var tie=x.a===x.b&&x.fa!=null;return '<span>'+(i+1)+'S '+(tie?'<s>'+x.a+'-'+x.b+'</s>'+x.fa+'-'+x.fb+'V':x.a+'-'+x.b)+'</span>'}).join('')+'</div>':'')+'</div>'}
 function viewResult(C){
   var tm=tourMatches(C),byId={};tm.forEach(function(m){byId[m.id]=m});
-  var h='<section class="rs-hero"><span class="rs-k">FINAL RESULT</span><h2>🏆 最終結果</h2><p>ぴょこたんカップ2026 クリスマスパーティ</p></section>';
+  var h='<section class="rs-hero"><span class="rs-k">FINAL RESULT</span><h2>🏆 最終結果</h2><p>ぴょこたんカップ2026 クリスマスパーティ</p></section><div class="rs-cols">';
   ['OF','JR'].forEach(function(d){var T=C.T,rows,ids;
-    if(d==='JR'){var f=T.A7,t=T.B6;rows=[['p1','優勝',f.win],['p2','準優勝',f.lose],['p3','第3位',t.win],['p4','第4位',t.lose]];ids=[['準決勝',['A5','A6']],['3位決定戦',['B6']],['決勝戦',['A7']]]}
-    else{var g=T.B7;rows=[['p1','優勝',g.win],['p2','準優勝',g.lose],['p3','第3位',T.B4.lose],['p3','第3位',T.B5.lose]];ids=[['準決勝',['B4','B5']],['決勝戦',['B7']]]}
-    h+='<section class="rs-div '+d+'"><h3 class="rs-dt"><span class="dv '+d+'">'+DIV[d].sh+'</span>'+DIV[d].nm+'</h3>';
-    h+='<div class="rs-champ"><small>🏆 優勝</small><b>'+(rows[0][2]?esc(rows[0][2]):'未確定')+'</b></div>';
-    h+='<ol class="rs-pod">'+rows.slice(1).map(function(r){return '<li class="'+r[0]+'"><span class="pl">'+r[1]+'</span><b>'+(r[2]?esc(r[2]):'<span class="ph">未確定</span>')+'</b></li>'}).join('')+'</ol>';
-    ids.forEach(function(g){h+='<p class="round rs-r">'+g[0]+'</p><div class="tlist">'+g[1].map(function(id){return matchHTML(byId[id],false)}).join('')+'</div>'});
-    h+='</section>'});
+    if(d==='JR'){var f=T.A7,t=T.B6;rows=[['p2','準優勝',f.lose],['p3','3位',t.win],['p4','4位',t.lose]];ids=['A5','A6','B6','A7'];var ch=f.win}
+    else{var g=T.B7;rows=[['p2','準優勝',g.lose],['p3','3位',T.B4.lose],['p3','3位',T.B5.lose]];ids=['B4','B5','B7'];var ch=g.win}
+    h+='<section class="rs-col '+d+'"><h3 class="rs-dt"><span class="dv '+d+'">'+DIV[d].sh+'</span></h3>'+champBox('優勝',ch,ch&&PREF[ch]);
+    h+='<ol class="rs-pod">'+rows.map(function(r){return '<li class="'+r[0]+'"><span class="pl">'+r[1]+'</span><b>'+(r[2]?esc(r[2])+pf(r[2]):'<span class="ph">未確定</span>')+'</b></li>'}).join('')+'</ol>';
+    h+='<div class="rm-list">'+ids.map(function(id){return rmatch(byId[id])}).join('')+'</div></section>'});
+  h+='</div>';
+  h+='<section class="rs-kaso"><h3 class="rs-dt">🎅 仮装コンテスト</h3>'+champBox('仮装 優勝',KASO_RES[0][0],KASO_RES[0][1])+'<ol class="rs-pod">'+KASO_RES.slice(1).map(function(r,i){return '<li class="p'+(i+2)+'"><span class="pl">'+['準優勝','3位','4位'][i]+'</span><b>'+esc(r[0])+'<small class="pf">（'+r[1]+'）</small></b></li>'}).join('')+'</ol></section>';
   return h;
 }
 function viewTour(C){
