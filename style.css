@@ -545,3 +545,8 @@ body.wide .refresh{display:none}
 .etbl .vnum{width:58px;height:40px;font-size:20px}
 .vin.on .vnum:not(:disabled){border-color:var(--gold);box-shadow:0 0 0 2px rgba(246,184,0,.3)}
 .bk .vtx{fill:var(--red)!important;font-family:var(--pop)}
+.bk .sep3{stroke:var(--line);stroke-width:1.5;stroke-dasharray:4 4}
+.bk .t3h{fill:var(--ink);font-weight:700}
+.bk .third{fill:#FBE7D6;stroke:#B5652E;stroke-width:1.5}
+.bk .thtx{fill:#6B3410;font-weight:700}
+:root[data-theme="dark"] .bk .third{fill:#3A2A20}:root[data-theme="dark"] .bk .thtx{fill:#F3C9A6}

@@ -201,9 +201,10 @@ function bracket(C,div){
   var tree={id:root,k:[build(TD[root].a),build(TD[root].b)]};
   var leaves=[];(function walk(n){if(n.seed)leaves.push(n);else n.k.forEach(walk)})(tree);
   function ht(n){return n.seed?0:1+Math.max(ht(n.k[0]),ht(n.k[1]))}
-  var H=ht(tree),W=360,boxW=112,champW=70,colW=(W-boxW-champW-26)/H,gap=div==='JR'?38:46,top=12;
+  var RORD=['1回戦','準々決勝','準決勝','決勝戦'],used=[];(function u(n){if(n.seed)return;var r=TD[n.id].r;if(used.indexOf(r)<0)used.push(r);n.k.forEach(u)})(tree);used.sort(function(a,b){return RORD.indexOf(a)-RORD.indexOf(b)});
+  var H=used.length,W=360,boxW=112,champW=70,colW=(W-boxW-champW-26)/H,gap=div==='JR'?38:46,top=12;
   leaves.forEach(function(l,i){l.y=top+18+i*gap});
-  (function pos(n){if(n.seed){n.x=boxW;return}n.k.forEach(pos);n.y=(n.k[0].y+n.k[1].y)/2;n.x=boxW+ht(n)*colW})(tree);
+  (function pos(n){if(n.seed){n.x=boxW;return}n.k.forEach(pos);n.y=(n.k[0].y+n.k[1].y)/2;n.x=boxW+(used.indexOf(TD[n.id].r)+1)*colW})(tree);
   var h='';
   // 線
   (function draw(n){if(n.seed)return;var t=T[n.id];
@@ -228,6 +229,16 @@ function bracket(C,div){
   h+='<rect class="runner" x="'+(W-champW)+'" y="'+(cy+28)+'" width="'+champW+'" height="40" rx="9"/><text x="'+(W-champW/2)+'" y="'+(cy+42)+'" font-size="9" text-anchor="middle" class="runtx">🥈 準優勝</text>'+fitText(W-champW/2,cy+59,rt&&rt.lose?rt.lose:'—',11,champW-8,'runtx','middle');
   var fv=finalV(root);if(fv){h+='<text x="'+(W-champW/2)+'" y="'+(cy+82)+'" font-size="8.5" text-anchor="middle" class="sub">決勝のセット</text>';fv.sets.forEach(function(x,i){if(x)h+='<text x="'+(W-champW/2)+'" y="'+(cy+95+i*11)+'" font-size="9" text-anchor="middle" class="setx">'+(i+1)+') '+x.a+'-'+x.b+(x.a===x.b&&x.w?' V':'')+'</text>'})}
   var hgt=Math.max(top+18+(leaves.length-1)*gap+26,cy+95+(fv?33:0));
+  var tp=TOUR.filter(function(d){return d.div===div&&d.r==='3位決定戦'})[0];
+  if(tp){var t3=T[tp.id],y0=hgt+26,ya=y0+22,yb=ya+gap,xm=boxW+colW*1.2,ym=(ya+yb)/2;
+    h+='<line x1="4" y1="'+(y0-14)+'" x2="'+(W-4)+'" y2="'+(y0-14)+'" class="sep3"/><text x="4" y="'+(y0)+'" font-size="11" class="t3h">🥉 3位決定戦（'+tp.id+'）</text>';
+    [['a',ya,tp.a],['b',yb,tp.b]].forEach(function(q){var nm=t3&&t3[q[0]],k=t3&&t3.aw!==undefined?(((q[0]==='a')===t3.aw)?'win':'lose'):null;
+      h+=line(boxW+','+q[1]+' '+xm+','+q[1]+' '+xm+','+ym,k);
+      if(t3&&t3.v){var tv=t3.v;if(tv.a===tv.b&&tv.w&&tv.fa!=null){var vo=tv.w===q[0]?10:0;h+=stag(xm-12-vo,q[1]-3,q[0]==='a'?tv.fa:tv.fb)+'<text x="'+(xm-27-vo)+'" y="'+(q[1]-3)+'" font-size="9.5" text-anchor="middle" class="sct2x">'+tv[q[0]]+'</text><line x1="'+(xm-32-vo)+'" y1="'+(q[1]-1)+'" x2="'+(xm-22-vo)+'" y2="'+(q[1]-12)+'" class="slash"/>'}else h+=stag(xm-12,q[1]-3,tv[q[0]]);if(tv.a===tv.b&&tv.w===q[0])h+='<text x="'+(xm-2)+'" y="'+(q[1]-3)+'" font-size="11" text-anchor="end" class="vtx">V</text>'}
+      h+='<rect class="box'+(nm?' on':'')+'" x="2" y="'+(q[1]-15)+'" width="'+(boxW-4)+'" height="30" rx="7"/><text x="9" y="'+(q[1]-4)+'" font-size="8" class="sub">'+esc(seedLabel(q[2]).replace('の敗者','（準決勝）の敗者'))+'</text>'+fitText(9,q[1]+10,nm||'未確定',nm?11:9.5,boxW-16,nm?'':'sub')});
+    h+=line(xm+','+ym+' '+(W-champW-2)+','+ym,t3&&t3.win?'win':null)+'<text x="'+(xm+4)+'" y="'+(ym+12)+'" font-size="8.5" class="sub">'+tp.id+'</text>';
+    h+='<rect class="third" x="'+(W-champW)+'" y="'+(ym-20)+'" width="'+champW+'" height="40" rx="9"/><text x="'+(W-champW/2)+'" y="'+(ym-6)+'" font-size="9" text-anchor="middle" class="thtx">🥉 第3位</text>'+fitText(W-champW/2,ym+11,t3&&t3.win?t3.win:'—',11,champW-8,'thtx','middle');
+    hgt=yb+24}
   return '<svg class="bk" viewBox="0 0 '+W+' '+hgt+'" role="img" aria-label="'+DIV[div].nm+'の決勝トーナメント表">'+h+'</svg>';
 }
 function podium(C,div){
