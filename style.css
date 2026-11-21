@@ -645,3 +645,9 @@ main .wrap>.rs-hero+.rs-cols{margin-top:-6px}
 .rm-r b .fin{display:inline}
 .rs-pod li{grid-template-columns:2.9em 1fr}
 .rs-pod .pl{white-space:nowrap}
+/* 優勝の枠を細く */
+.rc{padding:5px 6px 6px;grid-template-columns:auto auto;grid-template-areas:"cr lb" "nm nm" "pf pf";justify-content:center;column-gap:4px}
+.rc-crown{grid-area:cr;font-size:16px}
+.rc small{grid-area:lb;font-size:11px;letter-spacing:.15em;align-self:center}
+.rc b{grid-area:nm;font-size:clamp(15px,4.2vw,22px);line-height:1.15}
+.rc em{grid-area:pf;font-size:10px;line-height:1.2}
