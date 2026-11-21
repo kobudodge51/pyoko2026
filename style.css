@@ -461,3 +461,5 @@ body.wide .refresh{display:none}
 .sp-co .sp-url{font-size:12px;font-weight:700;color:var(--navy)}
 :root[data-theme="dark"] .sp-co .sp-url{color:var(--gold)}
 .sp-url u{text-decoration-color:var(--red);text-underline-offset:2px}
+.bh{display:grid;justify-items:center;gap:2px}
+.bh small{font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
