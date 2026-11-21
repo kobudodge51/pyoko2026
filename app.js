@@ -330,6 +330,10 @@ function viewSpon(){
 }
 /* ---------- BINGO ---------- */
 function bingoList(){var a=[];Object.keys(state.scores).forEach(function(k){if(/^bg\d+$/.test(k)){var v=state.scores[k];a.push({n:v.a,seq:v.b,key:k,t:v.t})}});return a.sort(function(x,y){return x.seq-y.seq})}
+function winList(){var a=[];Object.keys(state.scores).forEach(function(k){if(/^bw\d+$/.test(k)){var v=state.scores[k];a.push({no:v.a,key:k,t:v.t})}});return a.sort(function(x,y){return x.no-y.no})}
+var winSeen=null;
+function checkWins(){var W=winList(),mx=W.length?W[W.length-1].no:0;if(winSeen===null){winSeen=mx;return}if(mx>winSeen){winSeen=mx;showWin(mx,W[W.length-1].t)}else winSeen=mx}
+function showWin(no,t){var el=document.createElement('div');el.className='bw-pop';el.innerHTML='<div class="bw-in"><b>BINGO!!</b><span>'+no+'人目</span><small>'+hm(t||new Date().toISOString())+'</small></div>';document.body.appendChild(el);setTimeout(function(){el.classList.add('out')},3600);setTimeout(function(){el.remove()},4200);el.addEventListener('click',function(){el.remove()})}
 var bingoSeen=null;
 function checkBingo(){var L=bingoList(),mx=L.length?L[L.length-1].seq:0;if(bingoSeen===null){bingoSeen=mx;return}if(mx>bingoSeen){bingoSeen=mx;playBingo(L[L.length-1].n,L.length)}else bingoSeen=mx}
 function hm(t){if(!t)return '';var d=new Date(t);if(isNaN(d))return '';return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')}
@@ -349,6 +353,8 @@ function viewBingo(){
   var h='<div class="bg-layout"><div class="bg-left"><section class="bingo-stage"><div class="bg-title"><span>🎄</span> BINGO大会 <span>🎄</span></div><div class="bg-machine"><img class="chara c1" src="img/pyokotan.webp" alt="ぴょこたん" width="360" height="360"><div class="bg-drum">'+drumSVG()+'</div><img class="chara c2" src="img/joebull.webp" alt="ジョーブル" width="360" height="360"></div>'+
    '<div class="bg-names"><span>ぴょこたん</span><span>ジョーブル</span></div>'+
    '<div class="bg-latest">'+(last?'<small>いま出た番号（'+L.length+'個目'+(hm(last.t)?'・'+hm(last.t)+'に更新':'')+'）</small><div class="ball big"><i>'+col(last.n)+'</i><b>'+last.n+'</b></div>':'<small>まだ番号は出ていません</small><div class="ball big empty"><b>?</b></div>')+'</div></section>';
+  var W=winList();
+  h+='<div class="card bw-card"><h3>BINGO報告<span class="done">'+W.length+'人</span></h3>'+(W.length?'<ul class="bw-list">'+W.slice().reverse().map(function(w){return '<li><b>BINGO!!</b><span>'+w.no+'人目</span><small>'+hm(w.t)+'</small></li>'}).join('')+'</ul>':'<p class="note">まだBINGOの報告はありません。</p>')+(isAdmin()?'<div class="actions"><button type="button" class="btn primary" id="bw-add">🎉 BINGO報告を追加（'+(W.length+1)+'人目）</button></div>'+(W.length?'<button type="button" class="linkbtn" id="bw-undo">最後の報告（'+W.length+'人目）を取り消す</button>':''):'')+'</div>';
   if(isAdmin())h+='<div class="card bg-admin"><h3>番号を追加（管理者）</h3><form id="bingo-add" class="bg-form"><input id="bingo-num" class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="番号" aria-label="出た番号（1〜75）"><button class="btn primary" type="submit">追加して回す</button></form><p class="note">数字を入れて Enter でも追加できます。見ている全員の画面でガラガラの演出が流れます。</p>'+(last?'<button type="button" class="linkbtn" id="bingo-undo">最後の番号（'+last.n+'）を取り消す</button>':'')+'</div>';
   h+='</div><div class="bg-right">';
   h+='<div class="card"><h3>出た番号（新しい順）<span class="done">'+L.length+'個</span></h3>'+(L.length?'<div class="bg-hist">'+L.slice().reverse().map(function(x,i){return '<span class="bh"><span class="ball sm'+(i===0?' new':'')+'"><i>'+x.seq+'</i><b>'+x.n+'</b></span><small>'+hm(x.t)+'</small></span>'}).join('')+'</div>':'<p class="note">番号が出ると、ここに順番に並びます。聞き逃しても、ここで確認できます。</p>')+'</div>';
@@ -405,7 +411,7 @@ function render(){
 function stamp(){var d=new Date();lastSync=d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')}
 function loadAll(){if(!sb)return Promise.resolve(false);
   return Promise.all([sb.from('pk26_results').select('key,a,b,w,updated_at'),sb.from('pk26_settings').select('adj').eq('id',1).maybeSingle()]).then(function(r){
-    if(r[0].error)throw r[0].error;var s={};(r[0].data||[]).forEach(function(x){s[x.key]={a:x.a,b:x.b,w:x.w,t:x.updated_at}});state.scores=s;setTimeout(checkBingo,30);
+    if(r[0].error)throw r[0].error;var s={};(r[0].data||[]).forEach(function(x){s[x.key]={a:x.a,b:x.b,w:x.w,t:x.updated_at}});state.scores=s;setTimeout(function(){checkBingo();checkWins()},30);
     state.adj=(r[1].data&&r[1].data.adj)||{};loaded=true;loadError='';stamp();if(tab!=='login')render();return true;
   }).catch(function(e){console.error(e);loadError=loaded?'':'結果の読み込みに失敗しました。電波の良い場所で「最新情報に更新」を押してください。';render();return false});
 }
@@ -429,6 +435,8 @@ document.addEventListener('click',function(e){
       else{if(b)b.classList.remove('busy');toast('読み込めませんでした。電波を確認してもう一度押してください')}});
     return}
   if(e.target.closest('#logout')){cred=null;ls('pk26-cred',null);tab='sched';render();toast('ログアウトしました');return}
+  if(e.target.closest('#bw-add')&&isAdmin()&&!busy){var W=winList(),no=W.length?W[W.length-1].no+1:1,key='bw'+(no<10?'0':'')+no;once(rpc('pk26_save_result',{p_key:key,p_a:no,p_b:0,p_w:null}).then(function(r){if(r.error)throw r.error;var t=new Date().toISOString();state.scores[key]={a:no,b:0,w:null,t:t};winSeen=no;render();showWin(no,t)}).catch(werr));return}
+  if(e.target.closest('#bw-undo')&&isAdmin()&&!busy){var W2=winList(),lw=W2[W2.length-1];if(lw&&window.confirm(lw.no+'人目のBINGO報告を取り消しますか？')){once(rpc('pk26_delete_result',{p_key:lw.key}).then(function(r){if(r.error)throw r.error;delete state.scores[lw.key];winSeen=lw.no-1;render();toast(lw.no+'人目の報告を取り消しました')}).catch(werr))}return}
   if(e.target.closest('#bingo-undo')&&isAdmin()&&!busy){var L=bingoList(),la=L[L.length-1];if(la&&window.confirm(la.n+'番を取り消しますか？')){once(rpc('pk26_delete_result',{p_key:la.key}).then(function(r){if(r.error)throw r.error;delete state.scores[la.key];bingoSeen=L.length>1?L[L.length-2].seq:0;render();toast(la.n+'番を取り消しました')}).catch(werr))}return}
   if(!isAdmin()||busy)return;
   t=e.target.closest('[data-save]');if(t){saveRow(t.getAttribute('data-save'),true);return}
