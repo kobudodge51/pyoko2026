@@ -317,14 +317,14 @@ function saveRow(k,goNext){
 var SPON=[
  ['人材派遣・人材紹介',[['株式会社人材Bank','人も企業も支えあって生きている。','〒500-8282 岐阜県岐阜市西部大川1丁目51番地'],['株式会社アップルスタッフ','人も企業も支えあって生きている。','〒457-0863 愛知県名古屋市南区豊三丁目27番19号 第三スカイマンション202']]],
  ['求人媒体',[['株式会社アールエーピー','ぶらっとくる求人広告「じょ〜ぶ」「じょ〜ぶ.ねっと」','〒500-8356 岐阜県岐阜市六条江東1丁目1番3号']]],
- ['コンサルティング',[['株式会社ＪＢＧコンサルティング','会計Bank／ほけんBank','〒500-8282 岐阜県岐阜市西部大川1丁目51番地']]],
+ ['コンサルティング',[['株式会社ＪＢＧコンサルティング','会計Bank／ほけんBank','〒500-8282 岐阜県岐阜市西部大川1丁目51番地','https://3410-89.com/','https://3410-89.com/wp-content/themes/kaikeibank/images/top/main_img.png','記帳代行等の経理事務は相談無料・全国対応の会計Bank']]],
  ['美容',[['キングスサロン MEGAドン・キホーテ岐阜瑞穂店','KING\'S SALON','〒501-0224 岐阜県瑞穂市稲里580-1']]],
  ['教育',[['ＪＰＣスポーツ教室','','岐阜店：〒501-1153 岐阜県岐阜市又丸畑27-8<br>岐南店：〒501-6003 岐阜県羽島郡岐南町平島8丁目64番地']]],
  ['PC・WEB',[['株式会社ワンステップ','ONE STEP','〒500-8356 岐阜県岐阜市六条江東1丁目1番3号']]]
 ];
 function viewSpon(){
   var h='<section class="sp-hero"><small>ぴょこたんカップ2026 協賛</small><h2 class="sp-t">人材Bankグループ</h2><p>JBG（Jinzai Bank Group）Holdings　<span class="sp-20">20th <i>since 2006</i></span></p><p class="sp-thx">大会へのご協賛、ありがとうございます。</p></section>';
-  h+='<div class="sp-grid">'+SPON.map(function(g){return '<section class="sp-card"><h3 class="sp-cat">'+esc(g[0])+'</h3>'+g[1].map(function(c){return '<div class="sp-co"><b>'+esc(c[0])+'</b>'+(c[1]?'<em>'+esc(c[1])+'</em>':'')+'<span>'+c[2]+'</span></div>'}).join('')+'</section>'}).join('')+'</div>';
+  h+='<div class="sp-grid">'+SPON.map(function(g){return '<section class="sp-card"><h3 class="sp-cat">'+esc(g[0])+'</h3>'+g[1].map(function(c){return '<div class="sp-co"><b>'+esc(c[0])+'</b>'+(c[1]?'<em>'+esc(c[1])+'</em>':'')+'<span>'+c[2]+'</span>'+(c[3]?'<a class="sp-link" href="'+c[3]+'" target="_blank" rel="noopener">'+(c[4]?'<span class="sp-shot"><img src="'+c[4]+'" alt="'+esc(c[5]||'')+'" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.style.display=\'none\'"></span>':'')+'<span class="sp-url">🌐 '+esc(c[5]||'ホームページ')+'<br><u>'+esc(c[3].replace(/^https?:\/\//,'').replace(/\/$/,''))+'</u> ↗</span></a>':'')+'</div>'}).join('')+'</section>'}).join('')+'</div>';
   h+='<div class="sp-hold"><small>グループ本社</small><b>ＪＢＧホールディングス株式会社</b><span>〒500-8282 岐阜県岐阜市西部大川1丁目51番地</span></div>';
   return h;
 }
