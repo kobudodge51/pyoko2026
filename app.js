@@ -210,7 +210,7 @@ function bracket(C,div){
     n.k.forEach(function(kid,i){var side=i===0?'a':'b',k=null;
       if(t&&t.aw!==undefined)k=((side==='a')===t.aw)?'win':'lose';
       h+=line(kid.x+','+kid.y+' '+n.x+','+kid.y+' '+n.x+','+n.y,k);
-      if(t&&t.v){var tv=t.v;if(tv.a===tv.b&&tv.w&&tv.fa!=null){h+=stag(n.x-12,kid.y-3,side==='a'?tv.fa:tv.fb)+'<text x="'+(n.x-27)+'" y="'+(kid.y-3)+'" font-size="9.5" text-anchor="middle" class="sct2x">'+tv[side]+'</text><line x1="'+(n.x-32)+'" y1="'+(kid.y-1)+'" x2="'+(n.x-22)+'" y2="'+(kid.y-12)+'" class="slash"/>'}else h+=stag(n.x-12,kid.y-3,tv[side]);if(!TD[n.id].fin&&t.v.a===t.v.b&&t.v.w===side)h+='<text x="'+(n.x-(t.v.fa!=null?38:24))+'" y="'+(kid.y-3)+'" font-size="11" text-anchor="end" class="vtx">V</text>'}
+      if(t&&t.v){var tv=t.v;if(tv.a===tv.b&&tv.w&&tv.fa!=null){var vo=tv.w===side?10:0;h+=stag(n.x-12-vo,kid.y-3,side==='a'?tv.fa:tv.fb)+'<text x="'+(n.x-27-vo)+'" y="'+(kid.y-3)+'" font-size="9.5" text-anchor="middle" class="sct2x">'+tv[side]+'</text><line x1="'+(n.x-32-vo)+'" y1="'+(kid.y-1)+'" x2="'+(n.x-22-vo)+'" y2="'+(kid.y-12)+'" class="slash"/>'}else h+=stag(n.x-12,kid.y-3,tv[side]);if(!TD[n.id].fin&&t.v.a===t.v.b&&t.v.w===side)h+='<text x="'+(n.x-2)+'" y="'+(kid.y-3)+'" font-size="11" text-anchor="end" class="vtx">V</text>'}
       draw(kid)});
     h+='<text x="'+(n.x+4)+'" y="'+(n.y+12)+'" font-size="8.5" class="sub">'+n.id+'</text>';
   })(tree);
