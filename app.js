@@ -46,7 +46,7 @@ var state={scores:{},adj:{}}, sb=null, cred=null, loaded=false, online=false, lo
 function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);if(v===null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,v)}catch(e){return null}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 try{cred=JSON.parse(ls('pk26-cred')||'null')}catch(e){cred=null}
-var tab=ss('pk-tab')||'sched', filter=ls('pk-filter')||'', dview=ls('pk-div')||'', lview=ls('pk-ldiv')||'OF', tview=ls('pk-tdiv')||'OF', cursor=+(ss('pk-cursor')||0);
+var tab=ss('pk-tab')||'result', filter=ls('pk-filter')||'', dview=ls('pk-div')||'', lview=ls('pk-ldiv')||'OF', tview=ls('pk-tdiv')||'OF', cursor=+(ss('pk-cursor')||0);
 function isAdmin(){return !!cred}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function sc(k){var v=state.scores[k];return v&&typeof v.a==='number'&&typeof v.b==='number'?v:null}
@@ -111,6 +111,7 @@ function tourMatches(C){return TOUR.map(function(d){var t=C.T[d.id];return {key:
 
 /* ---------- 部品 ---------- */
 var ICON={
+  trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8M9 17h6"/></svg>',
   spon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-5 9 5v12"/><path d="M8 21v-6h8v6M3 21h18"/></svg>',
   bingo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><circle cx="12" cy="12" r="3.2"/></svg>',
   sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',
@@ -246,6 +247,19 @@ function podium(C,div){
   if(div==='JR'){var f=T.A7,t=T.B6;rows=[['p1','優勝',f.win],['p2','準優勝',f.lose],['p3','第3位',t.win],['','第4位',t.lose]]}
   else{var g=T.B7;rows=[['p1','優勝',g.win],['p2','準優勝',g.lose],['p3','第3位',T.B4.lose],['p3','第3位',T.B5.lose]]}
   return '<ol class="podium">'+rows.map(function(r){return '<li class="'+r[0]+'"><span class="pl">'+r[1]+'</span><span>'+(r[2]?esc(r[2]):'<span class="ph">未確定</span>')+'</span></li>'}).join('')+'</ol>';
+}
+function viewResult(C){
+  var tm=tourMatches(C),byId={};tm.forEach(function(m){byId[m.id]=m});
+  var h='<section class="rs-hero"><span class="rs-k">FINAL RESULT</span><h2>🏆 最終結果</h2><p>ぴょこたんカップ2026 クリスマスパーティ</p></section>';
+  ['OF','JR'].forEach(function(d){var T=C.T,rows,ids;
+    if(d==='JR'){var f=T.A7,t=T.B6;rows=[['p1','優勝',f.win],['p2','準優勝',f.lose],['p3','第3位',t.win],['p4','第4位',t.lose]];ids=[['準決勝',['A5','A6']],['3位決定戦',['B6']],['決勝戦',['A7']]]}
+    else{var g=T.B7;rows=[['p1','優勝',g.win],['p2','準優勝',g.lose],['p3','第3位',T.B4.lose],['p3','第3位',T.B5.lose]];ids=[['準決勝',['B4','B5']],['決勝戦',['B7']]]}
+    h+='<section class="rs-div '+d+'"><h3 class="rs-dt"><span class="dv '+d+'">'+DIV[d].sh+'</span>'+DIV[d].nm+'</h3>';
+    h+='<div class="rs-champ"><small>🏆 優勝</small><b>'+(rows[0][2]?esc(rows[0][2]):'未確定')+'</b></div>';
+    h+='<ol class="rs-pod">'+rows.slice(1).map(function(r){return '<li class="'+r[0]+'"><span class="pl">'+r[1]+'</span><b>'+(r[2]?esc(r[2]):'<span class="ph">未確定</span>')+'</b></li>'}).join('')+'</ol>';
+    ids.forEach(function(g){h+='<p class="round rs-r">'+g[0]+'</p><div class="tlist">'+g[1].map(function(id){return matchHTML(byId[id],false)}).join('')+'</div>'});
+    h+='</section>'});
+  return h;
 }
 function viewTour(C){
   var d=tview;
@@ -408,8 +422,8 @@ function render(){
   var C;try{C=compute()}catch(e){console.error(e);return}
   if(tab==='entry'&&!isAdmin())tab='login';
   var th=document.documentElement.getAttribute('data-theme');
-  var body=tab==='spon'?viewSpon():tab==='bingo'?viewBingo():tab==='league'?viewLeague(C):tab==='tour'?viewTour(C):tab==='info'?viewInfo():tab==='entry'?viewEntry(C):tab==='login'?viewLogin():viewSched(C);
-  var tabs=[['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour],['bingo','イベント',ICON.bingo],['spon','協賛',ICON.spon]];
+  var body=tab==='result'?viewResult(C):tab==='spon'?viewSpon():tab==='bingo'?viewBingo():tab==='league'?viewLeague(C):tab==='tour'?viewTour(C):tab==='info'?viewInfo():tab==='entry'?viewEntry(C):tab==='login'?viewLogin():viewSched(C);
+  var tabs=[['result','結果',ICON.trophy],['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour],['bingo','イベント',ICON.bingo],['spon','協賛',ICON.spon]];
   if(isAdmin())tabs.push(['entry','入力',ICON.entry]);
   var y=window.scrollY,ae=document.activeElement,aid=ae&&ae.id&&/^in-/.test(ae.id)?ae.id:null,sel0=aid&&ae.selectionStart!=null?[ae.selectionStart,ae.selectionEnd]:null;
   document.body.classList.toggle('wide',tab==='entry'||tab==='bingo'||tab==='spon');
