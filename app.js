@@ -346,12 +346,14 @@ function drumSVG(){
 }
 function viewBingo(){
   var L=bingoList(),last=L[L.length-1],called={};L.forEach(function(x){called[x.n]=x.seq});
-  var h='<section class="bingo-stage"><div class="bg-title"><span>🎄</span> BINGO大会 <span>🎄</span></div><div class="bg-machine"><img class="chara c1" src="img/pyokotan.webp" alt="ぴょこたん" width="360" height="360"><div class="bg-drum">'+drumSVG()+'</div><img class="chara c2" src="img/joebull.webp" alt="ジョーブル" width="360" height="360"></div>'+
+  var h='<div class="bg-layout"><div class="bg-left"><section class="bingo-stage"><div class="bg-title"><span>🎄</span> BINGO大会 <span>🎄</span></div><div class="bg-machine"><img class="chara c1" src="img/pyokotan.webp" alt="ぴょこたん" width="360" height="360"><div class="bg-drum">'+drumSVG()+'</div><img class="chara c2" src="img/joebull.webp" alt="ジョーブル" width="360" height="360"></div>'+
    '<div class="bg-names"><span>ぴょこたん</span><span>ジョーブル</span></div>'+
    '<div class="bg-latest">'+(last?'<small>いま出た番号（'+L.length+'個目'+(hm(last.t)?'・'+hm(last.t)+'に更新':'')+'）</small><div class="ball big"><i>'+col(last.n)+'</i><b>'+last.n+'</b></div>':'<small>まだ番号は出ていません</small><div class="ball big empty"><b>?</b></div>')+'</div></section>';
   if(isAdmin())h+='<div class="card bg-admin"><h3>番号を追加（管理者）</h3><form id="bingo-add" class="bg-form"><input id="bingo-num" class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="番号" aria-label="出た番号（1〜75）"><button class="btn primary" type="submit">追加して回す</button></form><p class="note">数字を入れて Enter でも追加できます。見ている全員の画面でガラガラの演出が流れます。</p>'+(last?'<button type="button" class="linkbtn" id="bingo-undo">最後の番号（'+last.n+'）を取り消す</button>':'')+'</div>';
+  h+='</div><div class="bg-right">';
   h+='<div class="card"><h3>出た番号（新しい順）<span class="done">'+L.length+'個</span></h3>'+(L.length?'<div class="bg-hist">'+L.slice().reverse().map(function(x,i){return '<span class="bh"><span class="ball sm'+(i===0?' new':'')+'"><i>'+x.seq+'</i><b>'+x.n+'</b></span><small>'+hm(x.t)+'</small></span>'}).join('')+'</div>':'<p class="note">番号が出ると、ここに順番に並びます。聞き逃しても、ここで確認できます。</p>')+'</div>';
   h+='<div class="card"><h3>番号表</h3><div class="bg-grid">'+['B','I','N','G','O'].map(function(c,ci){var cells='<div class="bg-col"><div class="bg-h">'+c+'</div>';for(var n=ci*15+1;n<=ci*15+15;n++)cells+='<div class="bg-c'+(called[n]?' on':'')+(last&&last.n===n?' last':'')+'">'+n+'</div>';return cells+'</div>'}).join('')+'</div><p class="note">色が付いている番号が、すでに出た番号です。</p></div>';
+  h+='</div></div>';
   return h;
 }
 var bingoTimer=null;
@@ -385,7 +387,7 @@ function render(){
   var tabs=[['info','要項',ICON.info],['sched','試合',ICON.sched],['league','予選',ICON.league],['tour','トーナメント',ICON.tour],['bingo','BINGO',ICON.bingo],['spon','協賛',ICON.spon]];
   if(isAdmin())tabs.push(['entry','入力',ICON.entry]);
   var y=window.scrollY,ae=document.activeElement,aid=ae&&ae.id&&/^in-/.test(ae.id)?ae.id:null,sel0=aid&&ae.selectionStart!=null?[ae.selectionStart,ae.selectionEnd]:null;
-  document.body.classList.toggle('wide',tab==='entry');
+  document.body.classList.toggle('wide',tab==='entry'||tab==='bingo');
   document.getElementById('app').innerHTML=
    '<header class="top"><div class="wrap"><div class="logo"><img class="ttl-img" src="img/title.webp" alt="ぴょこたんカップ2026" width="1344" height="216"><div class="meta"><span class="live'+(online?' on':'')+'"></span>'+(online?'LIVE 速報中':'速報ページ')+(VIS?'<span class="visits" title="アクセス数">🎁 <b>'+Number(VIS.total).toLocaleString('ja-JP')+'</b>（今日 '+Number(VIS.today).toLocaleString('ja-JP')+'）</span>':'')+'</div></div>'+
    '<div class="themesw" role="group" aria-label="表示モード"><button type="button" data-th="light" aria-label="ライトモード" aria-pressed="'+(th!=='dark')+'">'+ICON.sun+'</button><button type="button" data-th="dark" aria-label="ダークモード" aria-pressed="'+(th==='dark')+'">'+ICON.moon+'</button></div></div></header>'+

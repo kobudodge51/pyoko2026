@@ -463,3 +463,12 @@ body.wide .refresh{display:none}
 .sp-url u{text-decoration-color:var(--red);text-underline-offset:2px}
 .bh{display:grid;justify-items:center;gap:2px}
 .bh small{font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+/* BINGO：パソコンは横幅いっぱいに2列 */
+.bg-layout,.bg-left,.bg-right{display:grid;gap:16px;align-content:start}
+@media (min-width:900px){
+  .bg-layout{grid-template-columns:minmax(380px,0.85fr) 1.15fr;align-items:start}
+  .bg-left{position:sticky;top:calc(var(--hh) + 16px)}
+  .bg-hist{gap:12px}
+  .bg-hist .ball.sm{width:56px;height:56px}.bg-hist .ball.sm b{font-size:22px}
+  .bg-c{font-size:16px;padding:8px 0}
+}
