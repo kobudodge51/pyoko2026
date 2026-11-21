@@ -335,7 +335,7 @@ var winSeen=null;
 function checkWins(){if(BINGO_END){winSeen=0;return}var W=winList(),mx=W.length?W[W.length-1].no:0;if(winSeen===null){winSeen=mx;return}if(mx>winSeen){winSeen=mx;showWin(mx,W[W.length-1].t)}else winSeen=mx}
 function showWin(no,t){var el=document.createElement('div');el.className='bw-pop';el.innerHTML='<div class="bw-in"><b>BINGO!!</b><span>'+no+'人目</span><small>'+hm(t||new Date().toISOString())+'</small></div>';document.body.appendChild(el);setTimeout(function(){el.classList.add('out')},3600);setTimeout(function(){el.remove()},4200);el.addEventListener('click',function(){el.remove()})}
 var BINGO_END=true;
-var KASO=["サザン’97","Genki Kids","Soul West","TRICK SQUARE","ひだ闘球Monsters","ガンバベアーズ","Catching☆Star Jr.・Merveille☆Star","TOYOTA KATTZ"];
+var KASO=["サザン’97","Genki Kids","Soul West","TRICK SQUARE","ひだ闘球Monsters","ガンバベアーズ","Catching☆Star・Merveille☆Star","TOYOTA KATTZ"];
 function kasoHTML(){return '<section class="kaso"><div class="ks-h"><span class="ks-tag">午後開催</span><h2>🎅 仮装コンテスト</h2><p>エントリーナンバー順</p></div><ol class="ks-list">'+KASO.map(function(n,i){var hl=filter&&n.indexOf(filter)>=0;return '<li'+(hl?' class="hl"':'')+'><i>'+(i+1)+'</i><b>'+esc(n)+'</b></li>'}).join('')+'</ol></section>'}
 var bingoSeen=null;
 function checkBingo(){if(BINGO_END){bingoSeen=0;return}var L=bingoList(),mx=L.length?L[L.length-1].seq:0;if(bingoSeen===null){bingoSeen=mx;return}if(mx>bingoSeen){bingoSeen=mx;playBingo(L[L.length-1].n,L.length)}else bingoSeen=mx}
