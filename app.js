@@ -335,8 +335,10 @@ var winSeen=null;
 function checkWins(){if(BINGO_END){winSeen=0;return}var W=winList(),mx=W.length?W[W.length-1].no:0;if(winSeen===null){winSeen=mx;return}if(mx>winSeen){winSeen=mx;showWin(mx,W[W.length-1].t)}else winSeen=mx}
 function showWin(no,t){var el=document.createElement('div');el.className='bw-pop';el.innerHTML='<div class="bw-in"><b>BINGO!!</b><span>'+no+'人目</span><small>'+hm(t||new Date().toISOString())+'</small></div>';document.body.appendChild(el);setTimeout(function(){el.classList.add('out')},3600);setTimeout(function(){el.remove()},4200);el.addEventListener('click',function(){el.remove()})}
 var BINGO_END=true;
+var KASO_END=true;
+function kasoNotice(){if(!KASO_END||ls('pk-kaso-end'))return;ls('pk-kaso-end','1');var el=document.createElement('div');el.className='bw-pop ks-pop';el.innerHTML='<div class="bw-in ks-in"><span class="ks-e">🎅🎄</span><b>仮装コンテスト<br>終了！</b><span>たくさんのご参加<br>ありがとうございました</span><small>結果は表彰式で発表します！</small><button type="button">閉じる</button></div>';document.body.appendChild(el);function c(){el.classList.add('out');setTimeout(function(){el.remove()},500)}el.addEventListener('click',c);setTimeout(c,9000)}
 var KASO=["サザン’97","Genki Kids","Soul West","TRICK SQUARE","ひだ闘球Monsters","ガンバベアーズ","Catching☆Star Jr.・Merveille☆Star","TOYOTA KATTZ"];
-function kasoHTML(){return '<section class="kaso"><div class="ks-h"><span class="ks-tag">午後開催</span><h2>🎅 仮装コンテスト</h2><p>エントリーナンバー順</p></div><ol class="ks-list">'+KASO.map(function(n,i){var hl=filter&&n.indexOf(filter)>=0;return '<li'+(hl?' class="hl"':'')+'><i>'+(i+1)+'</i><b>'+esc(n)+'</b></li>'}).join('')+'</ol></section>'}
+function kasoHTML(){return '<section class="kaso"><div class="ks-h"><span class="ks-tag">'+(KASO_END?'終了しました':'午後開催')+'</span><h2>🎅 仮装コンテスト</h2>'+(KASO_END?'<div class="ks-end"><b>仮装コンテスト 終了！</b><span>結果は表彰式で発表します。お楽しみに！</span></div>':'')+'<p>エントリーナンバー順</p></div><ol class="ks-list">'+KASO.map(function(n,i){var hl=filter&&n.indexOf(filter)>=0;return '<li'+(hl?' class="hl"':'')+'><i>'+(i+1)+'</i><b>'+esc(n)+'</b></li>'}).join('')+'</ol></section>'}
 var bingoSeen=null;
 function checkBingo(){if(BINGO_END){bingoSeen=0;return}var L=bingoList(),mx=L.length?L[L.length-1].seq:0;if(bingoSeen===null){bingoSeen=mx;return}if(mx>bingoSeen){bingoSeen=mx;playBingo(L[L.length-1].n,L.length)}else bingoSeen=mx}
 function hm(t){if(!t)return '';var d=new Date(t);if(isNaN(d))return '';return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')}
@@ -481,7 +483,7 @@ document.addEventListener('submit',function(e){if(e.target.id==='bingo-add'){e.p
 });
 
 /* ---------- 起動 ---------- */
-render();if(tab==='entry')setTimeout(focusFirst,50);
+render();setTimeout(kasoNotice,600);if(tab==='entry')setTimeout(focusFirst,50);
 if(!CFG.SUPABASE_URL||!window.supabase){loadError='接続の準備ができていません。';render()}
 else{
   sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY,{auth:{persistSession:false}});
