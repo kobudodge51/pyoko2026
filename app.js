@@ -249,7 +249,7 @@ function podium(C,div){
   return '<ol class="podium">'+rows.map(function(r){return '<li class="'+r[0]+'"><span class="pl">'+r[1]+'</span><span>'+(r[2]?esc(r[2]):'<span class="ph">未確定</span>')+'</span></li>'}).join('')+'</ol>';
 }
 var PREF={"SOUL MAX池田":"岐阜県","TOYOTA KATTZ":"愛知県","Soul West":"愛知県","Genki Kids":"愛知県","J Soul":"愛知県","Catching☆Star Jr.":"愛知県","ガンバベアーズjr":"岐阜県","KATTZ Jr":"愛知県"};
-var KASO_RES=[["TOYOTA KATTZ","愛知県"],["ひだ闘球Monsters","岐阜県"],["TRICK SQUARE","岐阜県"],["Catching☆Star Jr.・Merveille☆Star","岐阜県"]];
+var KASO_RES=[["TOYOTA KATTZ","愛知県"],["ひだ闘球Monsters","岐阜県"],["TRICK SQUARE","岐阜県"],["Catching☆Star Jr.・Merveille☆Star","愛知県"]];
 function pf(n){return n&&PREF[n]?'<small class="pf">（'+PREF[n]+'）</small>':''}
 function champBox(label,name,pref){var sp='';for(var i=0;i<10;i++)sp+='<i style="left:'+(5+i*9.5)+'%;top:'+(i%2?18:70)+'%;animation-delay:-'+(i*.31).toFixed(2)+'s"></i>';
   return '<div class="rc"><div class="rc-sp">'+sp+'</div><div class="rc-crown">👑</div><small>'+label+'</small><b>'+(name?esc(name):'未確定')+'</b>'+(pref?'<em>'+pref+'</em>':'')+'</div>'}
