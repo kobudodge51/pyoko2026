@@ -57,6 +57,8 @@ function finalV(id){
   return {a:wa,b:wb,w:null,sets:sets,done:wa>=2||wb>=2};
 }
 function mv(m){if(m.fin){var f=finalV(m.id);return f&&f.done?f:null}return sc(m.key)}
+function parseW(o){if(o&&typeof o.w==='string'&&o.w.indexOf('|')>0){var p=o.w.split('|');o.w=p[0];o.fa=+p[1];o.fb=+p[2]}return o}
+function vf(v,side){return v&&v.a===v.b&&v.w&&v.fa!=null?'<span class="tie">'+v[side]+'</span><span class="fin">'+(side==='a'?v.fa:v.fb)+'</span>':null}
 function winA(v){if(!v)return null;return v.a>v.b?true:v.b>v.a?false:(v.w==='a'?true:v.w==='b'?false:null)}
 
 /* ---------- 計算 ---------- */
@@ -142,8 +144,8 @@ function matchHTML(m,now){
   var vp=function(s){return v&&v.a===v.b&&v.w===s?'<small class="vp">V</small>':''};
   var tag=m.kind==='pre'?m.blk+'ブロック':m.r;
   return '<div class="match'+(m.court==='B'?' cb':'')+(inv?' dim':'')+(now?' now':'')+'"><div class="tags"><span class="dv '+m.div+'">'+DIV[m.div].sh+'</span><span class="bk">'+esc(tag)+(m.kind==='tour'?'（'+m.id+'）':'')+'</span>'+(now?'<span class="pill">次の試合</span>':'')+'</div>'+
-    rowHTML(m.a,m.pa,m.kind==='pre'?m.ca:'',v?v.a:null,aw===true,vp('a'))+rowHTML(m.b,m.pb,m.kind==='pre'?m.cb:'',v?v.b:null,aw===false,vp('b'))+
-    (v&&v.a===v.b&&!v.w&&!m.fin?'<div class="ref">引き分け</div>':'')+(v&&!m.fin&&v.a===v.b&&v.w?'<div class="ref">時間終了 '+v.a+'-'+v.b+' → Vポイントで '+esc(v.w==='a'?m.a:m.b)+' の勝ち</div>':'')+(m.fin?'<div class="ref">'+(fv?fv.sets.map(function(x,i){return x?'第'+(i+1)+'セット '+x.a+'-'+x.b+(x.a===x.b&&x.w?'（V：'+esc(x.w==='a'?m.a:m.b)+'）':''):''}).filter(Boolean).join('<br>')+'<br>':'')+'5分3セットマッチ（大きい数字は取ったセット数）'+(fv&&!fv.done?'・試合中':'')+'</div>':'')+'</div>';
+    rowHTML(m.a,m.pa,m.kind==='pre'?m.ca:'',v?(vf(v,'a')||v.a):null,aw===true,vp('a'))+rowHTML(m.b,m.pb,m.kind==='pre'?m.cb:'',v?(vf(v,'b')||v.b):null,aw===false,vp('b'))+
+    (v&&v.a===v.b&&!v.w&&!m.fin?'<div class="ref">引き分け</div>':'')+(v&&!m.fin&&v.a===v.b&&v.w?'<div class="ref">時間終了 '+v.a+'-'+v.b+' → Vポイント'+(v.fa!=null?' → 最終 '+v.fa+'-'+v.fb:'')+'（'+esc(v.w==='a'?m.a:m.b)+' の勝ち）</div>':'')+(m.fin?'<div class="ref">'+(fv?fv.sets.map(function(x,i){return x?'第'+(i+1)+'セット '+x.a+'-'+x.b+(x.a===x.b&&x.w?'（V'+(x.fa!=null?' → 最終 '+x.fa+'-'+x.fb:'')+'：'+esc(x.w==='a'?m.a:m.b)+'）':''):''}).filter(Boolean).join('<br>')+'<br>':'')+'5分3セットマッチ（大きい数字は取ったセット数）'+(fv&&!fv.done?'・試合中':'')+'</div>':'')+'</div>';
 }
 function nextKeys(all){var n={};['A','B'].forEach(function(c){for(var i=0;i<all.length;i++){var m=all[i];if(m.court===c&&m.a&&m.b&&!mv(m)){n[m.key]=1;break}}});return n}
 function viewSched(C){
@@ -208,7 +210,7 @@ function bracket(C,div){
     n.k.forEach(function(kid,i){var side=i===0?'a':'b',k=null;
       if(t&&t.aw!==undefined)k=((side==='a')===t.aw)?'win':'lose';
       h+=line(kid.x+','+kid.y+' '+n.x+','+kid.y+' '+n.x+','+n.y,k);
-      if(t&&t.v){h+=stag(n.x-12,kid.y-3,t.v[side]);if(!TD[n.id].fin&&t.v.a===t.v.b&&t.v.w===side)h+='<text x="'+(n.x-24)+'" y="'+(kid.y-4)+'" font-size="8" text-anchor="end" class="vtx">V</text>'}
+      if(t&&t.v){var tv=t.v;if(tv.a===tv.b&&tv.w&&tv.fa!=null){h+=stag(n.x-12,kid.y-3,side==='a'?tv.fa:tv.fb)+'<text x="'+(n.x-27)+'" y="'+(kid.y-3)+'" font-size="9.5" text-anchor="middle" class="sct2x">'+tv[side]+'</text><line x1="'+(n.x-32)+'" y1="'+(kid.y-1)+'" x2="'+(n.x-22)+'" y2="'+(kid.y-12)+'" class="slash"/>'}else h+=stag(n.x-12,kid.y-3,tv[side]);if(!TD[n.id].fin&&t.v.a===t.v.b&&t.v.w===side&&t.v.fa==null)h+='<text x="'+(n.x-24)+'" y="'+(kid.y-4)+'" font-size="8" text-anchor="end" class="vtx">V</text>'}
       draw(kid)});
     h+='<text x="'+(n.x+4)+'" y="'+(n.y+12)+'" font-size="8.5" class="sub">'+n.id+'</text>';
   })(tree);
@@ -270,8 +272,9 @@ function viewLogin(){
 var MOBILE=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches), drafts={}, efil=ss('pk-efil')||'all';
 function maxOf(m){return m.fin?2:19}
 function cellVal(m,s){var d=drafts[m.key];if(d&&d[s]!==undefined)return d[s];var v=sc(m.key);return v?String(v[s]):''}
-function wVal(m){var d=drafts[m.key];if(d&&d.w!==undefined)return d.w;var v=sc(m.key);return v?v.w||'':''}
-function rowState(m){var d=drafts[m.key],v=sc(m.key);if(d&&(d.a!==undefined||d.b!==undefined||d.w!==undefined)){var a=cellVal(m,'a'),b=cellVal(m,'b'),w=wVal(m);if(!v||String(v.a)!==a||String(v.b)!==b||(v.w||'')!==w)return 'dirty'}return v?'saved':'empty'}
+function fVal(m,s){var d=drafts[m.key];if(d&&d[s]!==undefined)return d[s];var v=sc(m.key);return v&&v[s]!=null?String(v[s]):''}
+function wVal(m){var fa=fVal(m,'fa'),fb=fVal(m,'fb');if(fa!==''&&fb!==''&&fa!==fb)return (+fa>+fb)?'a':'b';return '';var d=drafts[m.key];if(d&&d.w!==undefined)return d.w;var v=sc(m.key);return v?v.w||'':''}
+function rowState(m){var d=drafts[m.key],v=sc(m.key);if(d&&(d.a!==undefined||d.b!==undefined||d.w!==undefined)){var a=cellVal(m,'a'),b=cellVal(m,'b');if(!v||String(v.a)!==a||String(v.b)!==b||(a===b&&(fVal(m,'fa')!==(v.fa!=null?String(v.fa):'')||fVal(m,'fb')!==(v.fb!=null?String(v.fb):''))))return 'dirty'}return v?'saved':'empty'}
 function viewEntry(C){
   var ms=allMatches(C),n=ms.filter(function(m){return sc(m.key)}).length;
   var list=ms.filter(function(m){return efil==='pre'?m.kind==='pre':efil==='tour'?m.kind==='tour':efil==='todo'?(!sc(m.key)&&!m.off):true});
@@ -291,7 +294,7 @@ function viewEntry(C){
      '<td class="c-in"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" id="in-'+k+'-a" data-k="'+k+'" data-s="a" data-max="'+mx+'" value="'+cellVal(m,'a')+'"'+(ok?'':' disabled')+' aria-label="'+esc(m.a||'左のチーム')+'の数字（0〜'+mx+'）"></td><td class="c-dash">−</td>'+
      '<td class="c-in"><input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" id="in-'+k+'-b" data-k="'+k+'" data-s="b" data-max="'+mx+'" value="'+cellVal(m,'b')+'"'+(ok?'':' disabled')+' aria-label="'+esc(m.b||'右のチーム')+'の数字（0〜'+mx+'）"></td>'+
      '<td class="c-tm">'+(ok?esc(m.b):'<span class="ph">'+esc(m.pb||'未確定')+'</span>')+'</td>'+
-     '<td class="c-v">'+(m.kind==='tour'?'<select class="vsel" id="in-'+k+'-w" data-k="'+k+'" data-s="w"'+(tie?'':' disabled')+' aria-label="同点のときの勝者"><option value="">'+(tie?'1か2を押して選ぶ':'同点のときだけ')+'</option><option value="a"'+(wVal(m)==='a'?' selected':'')+'>1：'+esc(m.a||'左')+'</option><option value="b"'+(wVal(m)==='b'?' selected':'')+'>2：'+esc(m.b||'右')+'</option></select>':'')+'</td>'+
+     '<td class="c-v">'+(m.kind==='tour'?'<div class="vin'+(tie?' on':'')+'"><span class="vl">'+(tie?'Vポイント後の最終':'同点のときだけ')+'</span><input class="num vnum" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" id="in-'+k+'-fa" data-k="'+k+'" data-s="fa" data-max="19" value="'+fVal(m,'fa')+'"'+(tie?'':' disabled')+' aria-label="Vポイント後の'+esc(m.a||'左')+'の数字"><b>−</b><input class="num vnum" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" id="in-'+k+'-fb" data-k="'+k+'" data-s="fb" data-max="19" value="'+fVal(m,'fb')+'"'+(tie?'':' disabled')+' aria-label="Vポイント後の'+esc(m.b||'右')+'の数字"></div>':'')+'</td>'+
      '<td class="c-op"><button type="button" class="sv" data-save="'+k+'" tabindex="-1"'+(ok?'':' disabled')+'>'+(st==='saved'?'保存済み':'保存')+'</button>'+(sc(k)?'<button type="button" class="del" data-del="'+k+'" tabindex="-1" aria-label="この試合の結果を消す">消す</button>':'')+'</td></tr>';
   });
   h+='</tbody></table></div>';
@@ -307,10 +310,10 @@ function saveRow(k,goNext){
   var as=cellVal(m,'a'),bs=cellVal(m,'b'),mx=maxOf(m);
   if(!/^\d{1,2}$/.test(as)||!/^\d{1,2}$/.test(bs)){toast('数字を2つとも入れてください');return}
   var a=+as,b=+bs;if(a>mx||b>mx){toast('0〜'+mx+'の数字を入れてください');return}
-  var w=a===b?(wVal(m)||null):null;
-  if(m.kind==='tour'&&a===b&&!w){toast('同点です。Vポイントで勝ったチームを選んでください');var sel=document.getElementById('in-'+k+'-w');if(sel)sel.focus();return}
+  var w=null,fa=null,fb=null;
+  if(m.kind==='tour'&&a===b&&!m.fin){var fas=fVal(m,'fa'),fbs=fVal(m,'fb');if(!/^\d{1,2}$/.test(fas)||!/^\d{1,2}$/.test(fbs)||fas===fbs){toast('同点です。Vポイント後の最終の数字を入れてください（同じ数字は不可）');var fi=document.getElementById('in-'+k+'-fa');if(fi){fi.focus();fi.select()}return}fa=+fas;fb=+fbs;w=(fa>fb?'a':'b')+'|'+fa+'|'+fb}
   if(m.fin&&a===b){toast('決勝戦はセット数で入力してください（例：2-1）');return}
-  once(rpc('pk26_save_result',{p_key:k,p_a:a,p_b:b,p_w:w}).then(function(r){if(r.error)throw r.error;state.scores[k]={a:a,b:b,w:w};delete drafts[k];render();
+  once(rpc('pk26_save_result',{p_key:k,p_a:a,p_b:b,p_w:w}).then(function(r){if(r.error)throw r.error;state.scores[k]=parseW({a:a,b:b,w:w});delete drafts[k];render();
     toast('保存しました：'+m.a+' '+a+' - '+b+' '+m.b);if(goNext)focusNext(k)}).catch(werr));
 }
 /* ---------- 協賛企業 ---------- */
@@ -416,7 +419,7 @@ function render(){
 function stamp(){var d=new Date();lastSync=d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')}
 function loadAll(){if(!sb)return Promise.resolve(false);
   return Promise.all([sb.from('pk26_results').select('key,a,b,w,updated_at'),sb.from('pk26_settings').select('adj').eq('id',1).maybeSingle()]).then(function(r){
-    if(r[0].error)throw r[0].error;var s={};(r[0].data||[]).forEach(function(x){s[x.key]={a:x.a,b:x.b,w:x.w,t:x.updated_at}});state.scores=s;setTimeout(function(){checkBingo();checkWins()},30);
+    if(r[0].error)throw r[0].error;var s={};(r[0].data||[]).forEach(function(x){s[x.key]=parseW({a:x.a,b:x.b,w:x.w,t:x.updated_at})});state.scores=s;setTimeout(function(){checkBingo();checkWins()},30);
     state.adj=(r[1].data&&r[1].data.adj)||{};loaded=true;loadError='';stamp();if(tab!=='login')render();return true;
   }).catch(function(e){console.error(e);loadError=loaded?'':'結果の読み込みに失敗しました。電波の良い場所で「最新情報に更新」を押してください。';render();return false});
 }
@@ -451,25 +454,28 @@ document.addEventListener('click',function(e){
 });
 document.addEventListener('change',function(e){
   if(e.target.id==='team-filter'){filter=e.target.value;ls('pk-filter',filter);render();return}
-  if(e.target.classList&&e.target.classList.contains('vsel')){var k=e.target.getAttribute('data-k');drafts[k]=drafts[k]||{};drafts[k].w=e.target.value;markRow(k)}
+
 });
 function markRow(k){var tr=document.querySelector('tr[data-row="'+k+'"]');var m=findM(k);if(!tr||!m)return;var st=rowState(m);tr.classList.remove('saved','dirty','empty');tr.classList.add(st);var b=tr.querySelector('.sv');if(b)b.textContent=st==='saved'?'保存済み':'保存';
-  var sel=document.getElementById('in-'+k+'-w');if(sel){var tie=cellVal(m,'a')!==''&&cellVal(m,'a')===cellVal(m,'b');sel.disabled=!tie;sel.options[0].textContent=tie?'1か2を押して選ぶ':'同点のときだけ'}}
+  var fa=document.getElementById('in-'+k+'-fa');if(fa){var tie=cellVal(m,'a')!==''&&cellVal(m,'a')===cellVal(m,'b');fa.disabled=!tie;document.getElementById('in-'+k+'-fb').disabled=!tie;var box=fa.parentNode;box.classList.toggle('on',tie);box.querySelector('.vl').textContent=tie?'Vポイント後の最終':'同点のときだけ'}}
 document.addEventListener('input',function(e){var t=e.target;if(!t.classList||!t.classList.contains('num'))return;var v=t.value.replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-65248)}).replace(/\D/g,'').slice(0,2);if(v!==t.value)t.value=v;var k=t.getAttribute('data-k'),sd=t.getAttribute('data-s');drafts[k]=drafts[k]||{};drafts[k][sd]=v;markRow(k);
   var mx=+t.getAttribute('data-max')||12,full=v!==''&&(v.length===2||v==='0'||(+v)*10>mx);if(!full)return;
   if(sd==='a'){var nb=document.getElementById('in-'+k+'-b');if(nb){nb.focus();nb.select()}return}
+  if(sd==='fa'){var nfb=document.getElementById('in-'+k+'-fb');if(nfb){nfb.focus();nfb.select()}return}
+  if(sd==='b'){var m0=findM(k);if(m0&&m0.kind==='tour'&&cellVal(m0,'a')===v){var f0=document.getElementById('in-'+k+'-fa');if(f0&&!f0.disabled){f0.focus();f0.select();return}}}
+  if(sd==='fb'){if(MOBILE){focusNext(k);saveRow(k,false)}return}
   if(MOBILE){var m=findM(k),ta=cellVal(m,'a');if(ta===''){var na=document.getElementById('in-'+k+'-a');if(na)na.focus();return}
-    if(m.kind==='tour'&&ta===v){var sel=document.getElementById('in-'+k+'-w');if(sel)sel.focus();return}
     focusNext(k);saveRow(k,false)}});
 document.addEventListener('keydown',function(e){var t=e.target;if(e.isComposing||!t.getAttribute||!t.getAttribute('data-k'))return;var k=t.getAttribute('data-k'),sd=t.getAttribute('data-s');
   if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();moveRow(k,sd,e.key==='ArrowDown'?1:-1);return}
   if(e.key!=='Enter')return;e.preventDefault();
   if(sd==='a'){var nb=document.getElementById('in-'+k+'-b');if(nb){nb.focus();nb.select()}return}
+  if(sd==='fa'){var nfb2=document.getElementById('in-'+k+'-fb');if(nfb2){nfb2.focus();nfb2.select()}return}
   if(sd==='b'){var m=findM(k);if(cellVal(m,'a')===''){var na=document.getElementById('in-'+k+'-a');if(na)na.focus();return}if(cellVal(m,'b')==='')return;
-    if(m.kind==='tour'&&cellVal(m,'a')===cellVal(m,'b')&&!wVal(m)){var sel=document.getElementById('in-'+k+'-w');if(sel)sel.focus();toast('同点です。Vポイントで勝ったチームを選んでください');return}}
+    if(m.kind==='tour'&&cellVal(m,'a')===cellVal(m,'b')&&!wVal(m)){var f1=document.getElementById('in-'+k+'-fa');if(f1&&!f1.disabled){f1.focus();f1.select();return}}}
   saveRow(k,true)});
 function moveRow(k,sd,d){var rows=[].slice.call(document.querySelectorAll('tr.er')),i=-1;rows.forEach(function(r,j){if(r.getAttribute('data-row')===k)i=j});
-  for(var j=i+d;j>=0&&j<rows.length;j+=d){var inp=rows[j].querySelector('input.num[data-s="'+(sd==='w'?'a':sd)+'"]:not([disabled])');if(inp){inp.focus();inp.select();inp.scrollIntoView({block:'nearest'});return}}}
+  for(var j=i+d;j>=0&&j<rows.length;j+=d){var inp=rows[j].querySelector('input.num[data-s="'+(sd==='fa'||sd==='fb'?'a':sd)+'"]:not([disabled])');if(inp){inp.focus();inp.select();inp.scrollIntoView({block:'nearest'});return}}}
 function focusFirst(){if(MOBILE)return;var rows=document.querySelectorAll('tr.er.empty,tr.er.dirty');for(var i=0;i<rows.length;i++){var inp=rows[i].querySelector('input.num:not([disabled])');if(inp){inp.focus();inp.select();inp.scrollIntoView({block:'center'});return}}}
 document.addEventListener('focusin',function(e){if(e.target.classList&&e.target.classList.contains('num'))e.target.select()});
 document.addEventListener('submit',function(e){if(e.target.id==='bingo-add'){e.preventDefault();if(isAdmin()&&!busy)addBingo();return}

@@ -532,3 +532,15 @@ body.wide .refresh{display:none}
 .ks-in small{display:block;margin-top:6px;padding:6px 14px;border-radius:999px;background:#FFE27A;color:#3A2A00!important;opacity:1!important;font-size:15px!important}
 .ks-in button{margin-top:10px;background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.5);border-radius:999px;padding:8px 22px;font-weight:700;cursor:pointer}
 .ks-pop.out{opacity:0;transition:opacity .5s}
+/* Vポイント：同点に斜線 → 最終スコア */
+.sc .tie{position:relative;display:inline-block;font-size:.72em;color:var(--muted);margin-right:4px;vertical-align:.1em}
+.sc .tie::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:2px;background:var(--red);transform:rotate(-55deg);border-radius:1px}
+.bk .sct2x{fill:var(--muted);font-weight:700}
+.bk .slash{stroke:var(--red);stroke-width:1.6;stroke-linecap:round}
+.vin{display:flex;align-items:center;gap:4px;flex-wrap:wrap;opacity:.45}
+.vin.on{opacity:1}
+.vin .vl{width:100%;font-size:10.5px;font-weight:700;color:var(--muted)}
+.vin.on .vl{color:var(--red)}
+.vin b{color:var(--muted)}
+.etbl .vnum{width:58px;height:40px;font-size:20px}
+.vin.on .vnum:not(:disabled){border-color:var(--gold);box-shadow:0 0 0 2px rgba(246,184,0,.3)}
